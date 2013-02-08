@@ -285,7 +285,7 @@ class CapabilitiesParser {
                     
                     case "SRS":
                         $srs[] = $node->nodeValue;
-                        
+                    break;
                     case "CRS":
                         $srs[] = $node->nodeValue;
                     break;
