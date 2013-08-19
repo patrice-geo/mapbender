@@ -94,6 +94,7 @@ class WmsInstanceConfigurationOptions extends InstanceConfigurationOptions
             "visible" => $this->visible,
             "format" => $this->format,
             "info_format" => $this->infoformat,
+            "info_charset" => $this->infocharset,
             "transparent" => $this->transparency,
             "opacity" => $this->opacity,
             "tiled" => $this->tiled,

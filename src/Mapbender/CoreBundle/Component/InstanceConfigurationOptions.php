@@ -29,6 +29,11 @@ abstract class InstanceConfigurationOptions
      */
     //@TODO Doctrine bug: "protected" replaced with "public"
     public $infoformat;
+
+    /**
+     * ORM\Column(type="string" nullable=true)
+     */
+    public $infocharset;
     /**
      * ORM\Column(type="float", nullable=true)
      */
@@ -107,6 +112,22 @@ abstract class InstanceConfigurationOptions
     public function getInfoformat(){
         return $this->infoformat;
     }
+
+    /**
+     * Sets the info charset.
+     */
+    public function setInfocharset($infocharset) {
+      $this->infocharset = $infocharset;
+      return $this;
+    }
+
+    /**
+     * @return the info charset, if set
+     */
+    public function getInfocharset() {
+      return $this->infocharset;
+    }
+
     /**
      * Sets an opacity
      * 

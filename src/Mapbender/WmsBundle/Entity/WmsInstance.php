@@ -63,6 +63,11 @@ class WmsInstance extends SourceInstance
     /**
      * @ORM\Column(type="string", nullable=true)
      */
+    protected $infocharset;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
     protected $exceptionformat = null;
 
     /**
@@ -165,6 +170,7 @@ class WmsInstance extends SourceInstance
                 ->setVisible($this->visible)
                 ->setFormat($this->getFormat())
                 ->setInfoformat($this->infoformat)
+                ->setInfocharset($this->infocharset)
                 ->setTransparency($this->transparency)
                 ->setOpacity($this->opacity / 100)
                 ->setTiled($this->tiled);
@@ -268,6 +274,7 @@ class WmsInstance extends SourceInstance
                 ->setVisible($this->getVisible())
                 ->setFormat($this->getFormat())
                 ->setInfoformat($this->getInfoformat())
+                ->setInfocharset($this->getInfocharset())
                 ->setTransparency($this->transparency)
                 ->setOpacity($this->opacity / 100)
                 ->setTiled($this->tiled)
@@ -443,6 +450,15 @@ class WmsInstance extends SourceInstance
     public function getInfoformat()
     {
         return $this->infoformat;
+    }
+
+    public function setInfocharset($infocharset) {
+      $this->infocharset = $infocharset;
+      return $this;
+    }
+
+    public function getInfocharset() {
+      return $this->infoformat;
     }
 
     /**

@@ -173,6 +173,7 @@ class ApplicationYAMLMapper
                         ->setVisible(!isset($layerDefinition['visible']) ? true : $layerDefinition['visible'])
                         ->setFormat(!isset($layerDefinition['format']) ? true : $layerDefinition['format'])
                         ->setInfoformat(!isset($layerDefinition['info_format']) ? null : $layerDefinition['info_format'])
+                        ->setInfocharset(!isset($layerDefinition['info_charset']) ? null : $layerDefinition['info_charset'])
                         ->setTransparency(!isset($layerDefinition['transparent']) ? true : $layerDefinition['transparent'])
                         ->setOpacity(!isset($layerDefinition['opacity']) ? 100 : $layerDefinition['opacity'])
                         ->setTiled(!isset($layerDefinition['tiled']) ? false : $layerDefinition['tiled'])

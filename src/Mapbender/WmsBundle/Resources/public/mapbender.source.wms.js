@@ -97,14 +97,15 @@ $.extend(true, Mapbender, {
                         !== 'undefined'){
                     param_tmp["INFO_FORMAT"] =
                             layer.source.configuration.options.info_format;
-                    //                contentType_ +=
-                    //                    layer.options.configuration.configuration.info_format;
+                    contentType_ += layer.source.configuration.options.info_format;
                 }
+
                 if(typeof(layer.source.configuration.options.info_charset)
                         !== 'undefined'){
-                    contentType_ += contentType_.length > 0 ? ";" : "" +
-                            layer.source.configuration.options.info_charset;
+                    contentType_ += (contentType_.length > 0 ? ";" : "") +
+                        layer.source.configuration.options.info_charset;
                 }
+
                 var params = $.param(param_tmp);
 
 
@@ -115,7 +116,7 @@ $.extend(true, Mapbender, {
 
                 $.ajax({
                     url: Mapbender.configuration.application.urls.proxy,
-                    contentType: contentType_,
+                    mimeType: contentType_,
                     data: {
                         url: encodeURIComponent(requestUrl)
                     },
