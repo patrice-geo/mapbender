@@ -84,6 +84,12 @@ class ApplicationController extends Controller {
             $path = $this->get('request')->server->get('REQUEST_URI');
         }
 
+	// Attention: convention for now is to strip off /${slug} from path if the path starts with it
+	// this fixes setups where an apache config rewrites /${slug}
+	if(strpos($path, '/' . $slug . '/application/') !== false) {
+	   $path = substr($path, strlen($slug) + 1);
+	}
+
         $target = str_replace('\\', '/', $this->get('request')->server->get('SCRIPT_FILENAME')
             . $path);
 
