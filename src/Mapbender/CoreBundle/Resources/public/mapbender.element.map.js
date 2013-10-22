@@ -29,7 +29,7 @@
             }
             var self = this,
             me = $(this.element);
-            this.model = Mapbender.DefaultModel;
+            this.model = Mapbender.Model;
             this.model.init(this);
 
             this.options = {
@@ -81,13 +81,17 @@
          *
          */
         addSource: function(sourceDef){
-            this.model.addSource(sourceDef, null, null);
+            this.model.addSource({add: {sourceDef: sourceDef, before: null, after: null}});
         },
         /**
          *
          */
         removeSource: function(toChangeObj){
-            if(toChangeObj && toChangeObj.source && toChangeObj.type){
+//            if(toChangeObj && toChangeObj.source && toChangeObj.type){
+//                this.model.removeSource(toChangeObj);
+//            }
+//            {remove: {sourceIdx: {id: source.id}}}
+            if(toChangeObj && toChangeObj.remove && toChangeObj.remove.sourceIdx){
                 this.model.removeSource(toChangeObj);
             }
         },
@@ -103,8 +107,9 @@
             for(var i = 0; i < this.model.sourceTree.length; i++){
                 var source = this.model.sourceTree[i];
                 if(!source.configuration.isBaseSource || (source.configuration.isBaseSource && withBaseSource)){
-                    var toremove = this.model.createToChangeObj(source);
-                    toRemoveArr.push(toremove);
+//                    var toremove = this.model.createToChangeObj(source);
+//                    toRemoveArr.push(toremove);
+                    toRemoveArr.push({remove: {sourceIdx: {id: source.id}}});
                 }
             }
             for(var i = 0; i < toRemoveArr.length; i++){
@@ -132,6 +137,7 @@
          * (see model.createChangedObj(id)).
          */
         fireModelEvent: function(options){
+//            window.console && console.log(options.name, options.value);
             this._trigger(options.name, null, options.value);
         },
         /**
