@@ -76,9 +76,9 @@ abstract class Source
      *
      * @return integer 
      */
-    public function getUUid()
+    public function getUuid()
     {
-        return $this->id;
+        return $this->uuid;
     }
 
     /**
