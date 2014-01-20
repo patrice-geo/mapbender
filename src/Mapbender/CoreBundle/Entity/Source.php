@@ -91,18 +91,6 @@ abstract class Source
         $this->uuid = Utils::guidv4();
         return $this;
     }
-    
-//    
-//    /**
-//     * Set uuid
-//     *
-//     * @return Source
-//     */
-//    public function setUuid($uuid)
-//    {
-//        $this->uuid = $uuid;
-//        return $this;
-//    }
 
     /**
      * Set title
