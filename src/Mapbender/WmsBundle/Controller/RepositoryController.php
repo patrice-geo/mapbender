@@ -121,6 +121,7 @@ class RepositoryController extends Controller
                 $doc = WmsCapabilitiesParser::createDocument($content);
                 $wmsParser = WmsCapabilitiesParser::getParser($doc);
                 $wmssource = $wmsParser->parse();
+                $wmssource->generateUuid();
             } catch (\Exception $e) {
                 $this->get("logger")->debug($e->getMessage());
                 $this->get('session')->setFlash('error', $e->getMessage());
@@ -166,6 +167,8 @@ class RepositoryController extends Controller
             $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_OWNER);
             $aclProvider->updateAcl($acl);
 
+            $this->get('session')->set('sourceId', $wmssource->getUuid());
+            
             $this->get('session')->setFlash('success',
                 "Your WMS has been created");
             return $this->redirect($this->generateUrl(
@@ -201,6 +204,7 @@ class RepositoryController extends Controller
         $wmsinstances = $this->getDoctrine()
             ->getRepository("MapbenderWmsBundle:WmsInstance")
             ->findBySource($sourceId);
+        $uuid = $wmssource->getUuid();
         $em = $this->getDoctrine()->getEntityManager();
         $em->getConnection()->beginTransaction();
 
@@ -215,6 +219,7 @@ class RepositoryController extends Controller
         $wmssource->remove($em);
         $em->flush();
         $em->getConnection()->commit();
+        $this->get('session')->set('sourceId', $uuid);
         $this->get('session')->setFlash('success', "Your WMS has been deleted");
         return $this->redirect($this->generateUrl("mapbender_manager_repository_index"));
     }

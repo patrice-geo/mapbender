@@ -72,14 +72,37 @@ abstract class Source
     
     
     /**
-     * Get id
+     * Get uuid
      *
-     * @return integer 
+     * @return string 
      */
     public function getUuid()
     {
         return $this->uuid;
     }
+    
+    /**
+     * Set uuid
+     *
+     * @return Source
+     */
+    public function generateUuid()
+    {
+        $this->uuid = Utils::guidv4();
+        return $this;
+    }
+    
+//    
+//    /**
+//     * Set uuid
+//     *
+//     * @return Source
+//     */
+//    public function setUuid($uuid)
+//    {
+//        $this->uuid = $uuid;
+//        return $this;
+//    }
 
     /**
      * Set title
