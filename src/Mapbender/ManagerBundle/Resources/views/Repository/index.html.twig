@@ -18,7 +18,7 @@
     {% for source in sources %}
       <li class="filterItem">
         <div class="col1">
-          <span class="smallerText">{{ source.id }}</span><br>
+          <span class="smallerText">{{ source.id }}{#{ source.uuid }#}</span><br>
           <span class="smallerText">{{ source.type }}</span>
         </div>
         <div class="col2 box">

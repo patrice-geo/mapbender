@@ -5,6 +5,8 @@ namespace Mapbender\CoreBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Mapbender\CoreBundle\Component\Utils;
 
 /**
  * Source entity
@@ -12,6 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @author Paul Schmidt
  *
  * @ORM\Entity
+ * @UniqueEntity("uuid")
  * @ORM\Table(name="mb_core_source")
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="discr", type="string")
@@ -27,6 +30,12 @@ abstract class Source
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
+    
+    /**
+     * @var string $id
+     * @ORM\Column(type="string", nullable=false, unique=true)
+     */
+    protected $uuid;
 
     /**
      * @var string $title The source title
@@ -45,6 +54,11 @@ abstract class Source
      * @ORM\Column(type="text", nullable=true)
      */
     protected $description;
+    
+    public function __construct()
+    {
+        $this->uuid = Utils::guidv4();
+    }
 
     /**
      * Get id
@@ -52,6 +66,17 @@ abstract class Source
      * @return integer 
      */
     public function getId()
+    {
+        return $this->id;
+    }
+    
+    
+    /**
+     * Get id
+     *
+     * @return integer 
+     */
+    public function getUUid()
     {
         return $this->id;
     }
