@@ -72,6 +72,8 @@ class PrintService
         foreach ($this->data['layers'] as $i => $layer) {
             $url = strstr($this->data['layers'][$i]['url'], 'BBOX', true);
             $this->layer_urls[$i] = $url;
+            //opacity
+            $this->layerOpacity[$i] = $this->data['layers'][$i]['opacity']*100;
         }
     }
 
@@ -170,11 +172,12 @@ class PrintService
                 //throw new \RuntimeException("Unknown mimetype " . trim($response->headers->get('content-type')));
             }
 
-            if ($im !== null) {
-                imagesavealpha($im, true);
-                imagepng($im, $imagename);
+            if ($im !== null) {    
+                    imagealphablending($im, false);
+                    imagesavealpha($im, true);
+                    imagepng($im, $imagename);     
             }
-        }
+        } 
         // create final merged image
         $finalimagename = $tempdir . '/mergedimage.png';
         $finalImage = imagecreatetruecolor($this->image_width,
@@ -182,18 +185,22 @@ class PrintService
         $bg = ImageColorAllocate($finalImage, 255, 255, 255);
         imagefilledrectangle($finalImage, 0, 0, $this->image_width,
             $this->image_height, $bg);
-        imagepng($finalImage, $finalimagename);
         foreach ($this->layer_urls as $k => $url) {
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            if (is_file($tempdir . '/tempimage' . $k) && finfo_file($finfo,
+            if (file_exists($tempdir . '/tempimage' . $k) && finfo_file($finfo,
                     $tempdir . '/tempimage' . $k) == 'image/png') {
-                $dest = imagecreatefrompng($finalimagename);
+                $dest = $finalImage;
                 $src = imagecreatefrompng($tempdir . '/tempimage' . $k);
-                imagecopy($dest, $src, 0, 0, 0, 0, $this->image_width,
-                    $this->image_height);
+                if ($this->layerOpacity[$k] !== 100){
+                    ImageCopyMerge($dest, $src, 0, 0, 0, 0, $this->image_width,
+                       $this->image_height, $this->layerOpacity[$k]);
+                }else{
+                    imagecopy($dest, $src, 0, 0, 0, 0, $this->image_width,
+                        $this->image_height);
+                }
                 imagepng($dest, $finalimagename);
-            }
-            unlink($tempdir . '/tempimage' . $k);
+                unlink($tempdir . '/tempimage' . $k);           
+            }  
             finfo_close($finfo);
         }
     }
@@ -252,7 +259,7 @@ class PrintService
             $imagename = $tempdir . '/tempimage' . $k;
 
             file_put_contents($imagename, $response->getContent());
-
+            $im = null;
             switch (trim($response->headers->get('content-type'))) {
                 case 'image/png' :
                     $im = imagecreatefrompng($imagename);
@@ -271,34 +278,36 @@ class PrintService
             if ($k == 0 && isset($this->data['features'])){
                 $this->drawRotatedFeatures($im);
             }
+            if ($im !== null) {
             
-            //rotate image
-            $transColor = imagecolorallocatealpha($im, 255, 255, 255, 127);
-            $rotatedImage = imagerotate($im, $rotation, $transColor);
-            imagealphablending($rotatedImage, false);
-            imagesavealpha($rotatedImage, true);
-            imagepng($rotatedImage, $imagename);
+                //rotate image
+                $transColor = imagecolorallocatealpha($im, 255, 255, 255, 127);
+                $rotatedImage = imagerotate($im, $rotation, $transColor);
+                imagealphablending($rotatedImage, false);
+                imagesavealpha($rotatedImage, true);
+                imagepng($rotatedImage, $imagename);
 
-            //clip image from rotated
-            $rotated_width = round(abs(sin(deg2rad($rotation)) * $neededImageHeight) +
-                abs(cos(deg2rad($rotation)) * $neededImageWidth));
-            $rotated_height = round(abs(sin(deg2rad($rotation)) * $neededImageWidth) +
-                abs(cos(deg2rad($rotation)) * $neededImageHeight));
-            $newx = ($rotated_width - $this->image_width ) / 2;
-            $newy = ($rotated_height - $this->image_height ) / 2;
+                //clip image from rotated
+                $rotated_width = round(abs(sin(deg2rad($rotation)) * $neededImageHeight) +
+                    abs(cos(deg2rad($rotation)) * $neededImageWidth));
+                $rotated_height = round(abs(sin(deg2rad($rotation)) * $neededImageWidth) +
+                    abs(cos(deg2rad($rotation)) * $neededImageHeight));
+                $newx = ($rotated_width - $this->image_width ) / 2;
+                $newy = ($rotated_height - $this->image_height ) / 2;
 
-            $clippedImageName = $tempdir . '/clipped_image' . $k . '.png';
-            $clippedImage = imagecreatetruecolor($this->image_width,
-                $this->image_height);
+                $clippedImageName = $tempdir . '/clipped_image' . $k;
+                $clippedImage = imagecreatetruecolor($this->image_width,
+                    $this->image_height);
 
-            imagealphablending($clippedImage, false);
-            imagesavealpha($clippedImage, true);
+                imagealphablending($clippedImage, false);
+                imagesavealpha($clippedImage, true);
 
-            imagecopy($clippedImage, $rotatedImage, 0, 0, $newx, $newy,
-                $this->image_width, $this->image_height);
-            imagepng($clippedImage, $clippedImageName);
+                imagecopy($clippedImage, $rotatedImage, 0, 0, $newx, $newy,
+                    $this->image_width, $this->image_height);
+                imagepng($clippedImage, $clippedImageName);
 
-            unlink($tempdir . '/tempimage' . $k);
+                unlink($tempdir . '/tempimage' . $k);
+            }
         }
         // create final merged image
         $finalimagename = $tempdir . '/mergedimage.png';
@@ -309,12 +318,18 @@ class PrintService
             $this->image_height, $bg);
         imagepng($finalImage, $finalimagename);
         foreach ($this->layer_urls as $k => $url) {
-            $dest = imagecreatefrompng($finalimagename);
-            $src = imagecreatefrompng($tempdir . '/clipped_image' . $k . '.png');
-            imagecopy($dest, $src, 0, 0, 0, 0, $this->image_width,
-                $this->image_height);
-            imagepng($dest, $finalimagename);
-            unlink($tempdir . '/clipped_image' . $k . '.png');
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            if (file_exists($tempdir . '/clipped_image' . $k) && finfo_file($finfo,
+                    $tempdir . '/clipped_image' . $k) == 'image/png') {
+                      
+                $dest = imagecreatefrompng($finalimagename);
+                $src = imagecreatefrompng($tempdir . '/clipped_image' . $k);
+                imagecopy($dest, $src, 0, 0, 0, 0, $this->image_width,
+                    $this->image_height);
+                imagepng($dest, $finalimagename);
+                unlink($tempdir . '/clipped_image' . $k);
+            }
+            finfo_close($finfo);
         }
     }
 
@@ -377,7 +392,7 @@ class PrintService
                     break;
                 default:
                     if (isset($this->data['extra'][$k])) {
-                        $pdf->Cell($this->conf['fields'][$k]['width'] * 10,
+                        $pdf->MultiCell($this->conf['fields'][$k]['width'] * 10,
                             $this->conf['fields'][$k]['height'] * 10,
                             utf8_decode($this->data['extra'][$k]));
                     }
@@ -406,13 +421,13 @@ class PrintService
                     $this->conf['northarrow']['height'] * 10);
             }
         } else {
-            if (isset($this->conf['northarrow'])) {
-                $this->rotateNorthArrow();
-            }
             $pdf->Image($tempdir . '/mergedimage.png', $this->x_ul, $this->y_ul,
                 $this->width, $this->height, 'png', '', false, 0, 5, -1 * 0);
 
             $pdf->Rect($this->x_ul, $this->y_ul, $this->width, $this->height);
+            if (isset($this->conf['northarrow'])) {
+                $this->rotateNorthArrow();
+            }
         }
                
         if (isset($this->data['overview']) && isset($this->conf['overview']) ) {
