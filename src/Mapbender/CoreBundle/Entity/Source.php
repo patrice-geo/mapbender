@@ -32,7 +32,7 @@ abstract class Source
     protected $id;
     
     /**
-     * @var string $id
+     * @var string $uuid The unic id
      * @ORM\Column(type="string", nullable=false, unique=true)
      */
     protected $uuid;
