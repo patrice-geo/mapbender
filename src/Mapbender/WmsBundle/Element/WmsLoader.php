@@ -3,6 +3,7 @@ namespace Mapbender\WmsBundle\Element;
 
 use Mapbender\CoreBundle\Component\Element;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * WmsLoader
@@ -138,7 +139,7 @@ class WmsLoader extends Element
     {
         $gc_url = urldecode($this->container->get('request')->get("url", null));
         $signer = $this->container->get('signer');
-        $signedUrl = $signer->signUrl($gc_url);
+        $signedUrl = $signer->signUrl(urldecode($gc_url));
         $data = $this->container->get('request')->get('data', null);
         return $this->container->get('http_kernel')->forward(
                 'OwsProxy3CoreBundle:OwsProxy:entryPoint',
