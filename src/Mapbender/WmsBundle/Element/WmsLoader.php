@@ -138,8 +138,11 @@ class WmsLoader extends Element
     protected function getCapabilities()
     {
         $gc_url = urldecode($this->container->get('request')->get("url", null));
+        while(!is_bool(strpos($gc_url, "%"))){
+            $gc_url = urldecode($gc_url);
+        }
         $signer = $this->container->get('signer');
-        $signedUrl = $signer->signUrl(urldecode($gc_url));
+        $signedUrl = $signer->signUrl($gc_url);
         $data = $this->container->get('request')->get('data', null);
         return $this->container->get('http_kernel')->forward(
                 'OwsProxy3CoreBundle:OwsProxy:entryPoint',
