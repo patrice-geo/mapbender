@@ -34,6 +34,7 @@ class MapbenderCoreBundle extends MapbenderBundle
     {
         return array('Mapbender\CoreBundle\Template\Fullscreen',
             'Mapbender\CoreBundle\Template\FullscreenAlternative',
+            'Mapbender\CoreBundle\Template\Responsive',
             'Mapbender\CoreBundle\Template\Classic');
     }
 
@@ -76,6 +77,7 @@ class MapbenderCoreBundle extends MapbenderBundle
     {
         return array(
             'Mapbender\CoreBundle\Entity\Application' => 'Application',
+            'Mapbender\CoreBundle\Entity\Element' => 'Element',
             'Mapbender\CoreBundle\Entity\Source' => 'Service Source');
     }
 

@@ -5,7 +5,7 @@ use Mapbender\CoreBundle\Component\Template;
 
 /**
  * Template FullscreenAlternative
- * 
+ *
  * @author Christian Wygoda
  */
 class FullscreenAlternative extends Template
@@ -18,7 +18,7 @@ class FullscreenAlternative extends Template
         return array(
             'sidepane' => array(
                 'tabs' => array(
-                    'state' => true,
+                    'state' => false,
                     'options' => array('icon' => 'XXX')
                 )
             )
@@ -36,17 +36,25 @@ class FullscreenAlternative extends Template
     /**
      * @inheritdoc
      */
-    public function getAssets($type)
+    static public function listAssets()
     {
-        parent::getAssets($type);
         $assets = array(
-            'css' => array('@FOMCoreBundle/Resources/public/css/frontend/fullscreen_alternative.css'),
+            'css' => array('@MapbenderCoreBundle/Resources/public/sass/theme/mapbender3.scss',
+                           '@MapbenderCoreBundle/Resources/public/sass/template/fullscreen_alternative.scss'),
             'js' => array('@FOMCoreBundle/Resources/public/js/widgets/popup.js',
                 '@FOMCoreBundle/Resources/public/js/frontend/sidepane.js',
                 '@FOMCoreBundle/Resources/public/js/frontend/tabcontainer.js'),
             'trans' => array()
         );
+        return $assets;
+    }
 
+    /**
+     * @inheritdoc
+     */
+    public function getAssets($type)
+    {
+        $assets = $this::listAssets();
         return $assets[$type];
     }
 
@@ -66,7 +74,7 @@ class FullscreenAlternative extends Template
     {
         $region_props = $this->application->getEntity()->getNamedRegionProperties();
         $default_region_props = $this->getRegionsProperties();
-        
+
         $templating = $this->container->get('templating');
         return $templating
                 ->render('MapbenderCoreBundle:Template:fullscreen_alternative.html.twig',

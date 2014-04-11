@@ -33,12 +33,35 @@ class ElementController extends Controller
      */
     public function selectAction($slug)
     {
-        $trans = $this->container->get('translator');
-        $elements = array();
-        foreach ($this->get('mapbender')->getElements() as $elementClassName) {
+        $application = $this->get('mapbender')->getApplicationEntity($slug);
+        $template    = $application->getTemplate();
+        $region      = $this->get('request')->get('region');
+        $whitelist   = null;
+        $classNames  = null;
+
+        //
+        // It's a quick solution for the Responsive template
+        // Each template should have a whitelist
+        //
+        if($template::getTitle() === 'Responsive'){
+            $whitelist = $template::getElementWhitelist();
+            $whitelist = $whitelist[$region];
+        }
+
+        $trans      = $this->container->get('translator');
+        $elements   = array();
+
+        //
+        // Get only the class names from the whitelist elements, otherwise
+        // get them all
+        //
+        $classNames = ($whitelist) ? $whitelist
+                                   : $this->get('mapbender')->getElements();
+
+        foreach ($classNames as $elementClassName) {
             $title = $trans->trans($elementClassName::getClassTitle());
             $tags = array();
-            foreach($elementClassName::getClassTags() as $tag){
+            foreach ($elementClassName::getClassTags() as $tag) {
                 $tags[] = $trans->trans($tag);
             }
             $elements[$title] = array(
@@ -47,10 +70,12 @@ class ElementController extends Controller
                 'description' => $trans->trans($elementClassName::getClassDescription()),
                 'tags' => $tags);
         }
+
         ksort($elements, SORT_LOCALE_STRING);
         return array(
             'elements' => $elements,
-            'region' => $this->get('request')->get('region'));
+            'region' => $region,
+            'whitelist_exists' => ($whitelist !== null)); // whitelist_exists variable can be removed, if every template supports whitelists
     }
 
     /**
@@ -211,6 +236,70 @@ class ElementController extends Controller
         } else {
             return array(
                 'form' => $form['type']->getForm()->createView(),
+                'theme' => $form['theme'],
+                'assets' => $form['assets']);
+        }
+    }
+
+    /**
+     * @ManagerRoute("/application/{slug}/element/{id}/security", requirements={"id" = "\d+"})
+     * @Template("MapbenderManagerBundle:Element:security.html.twig")
+     */
+    public function securityAction($slug, $id)
+    {
+        $em = $this->getDoctrine()->getEntityManager();
+
+        $application = $this->get('mapbender')->getApplicationEntity($slug);
+
+        $element = $this->getDoctrine()
+            ->getRepository('MapbenderCoreBundle:Element')
+            ->findOneById($id);
+
+        if (!$element) {
+            throw $this->createNotFoundException('The element with the id "'
+                . $id . '" does not exist.');
+        }
+        $em->detach($element); // prevent element from being stored with default config/stored again
+        if ($this->getRequest()->getMethod() === 'POST') {
+            $form = ComponentElement::getElementForm($this->container,
+                    $application, $element, true);
+            $request = $this->getRequest();
+            $form['form']->bindRequest($request);
+            if ($form['form']->isValid()) {
+                $em->getConnection()->beginTransaction();
+                try {
+                    $application->setUpdated(new \DateTime('now'));
+                    $em->persist($application);
+
+                    $aclManager = $this->get('fom.acl.manager');
+                    $aclManager->setObjectACLFromForm($element,
+                        $form['form']->get('acl'), 'object');
+                    $em->flush();
+                    $em->getConnection()->commit();
+                    $this->get('session')->setFlash('success',
+                        "Your element's access has been changed.");
+                } catch (\Exception $e) {
+                    $this->get('session')->setFlash('error',
+                        "There was an error trying to change your element's access.");
+                    $em->getConnection()->rollback();
+                    $em->close();
+
+                    if ($this->container->getParameter('kernel.debug')) {
+                        throw($e);
+                    }
+                }
+            } else {
+                return array(
+                    'form' => $form['form']->createView(),
+                    'theme' => $form['theme'],
+                    'assets' => $form['assets']);
+            }
+        } else {
+
+            $form = ComponentElement::getElementForm($this->container,
+                    $application, $element, true);
+            return array(
+                'form' => $form['form']->createView(),
                 'theme' => $form['theme'],
                 'assets' => $form['assets']);
         }

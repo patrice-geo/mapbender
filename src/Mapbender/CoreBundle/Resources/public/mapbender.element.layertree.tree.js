@@ -2,11 +2,14 @@
     $.widget("mapbender.mbLayertree", {
         options: {
             autoOpen: false,
-            target: null
+            target: null,
+			layerInfo: true,
+            menu: []
         },
         model: null,
         dlg: null,
         template: null,
+        menuTemplate: null,
         layerconf: null,
         popup: null,
         created: false,
@@ -31,16 +34,19 @@
             this.transConst.outOfBounds = Mapbender.trans("mb.core.layertree.const.outofbounds");
             this.transConst.parentInvisible = Mapbender.trans("mb.core.layertree.const.parentinvisible");
             this.options.titlemaxlength = parseInt(this.options.titlemaxlength);
-            this.options.layerMenu = false;
             var self = this;
             this.elementUrl = Mapbender.configuration.application.urls.element + '/' + this.element.attr('id') + '/';
             this.template = $('li', this.element).remove();
+            this.template.removeClass('hidden');
+            this.menuTemplate = $('#layer-menu', this.template).remove();
+
             this.model = $("#" + self.options.target).data("mapbenderMbMap").getModel();
             if(this.options.type === 'element'){
                 this._createTree();
             }else if(this.options.type === 'dialog' && new Boolean(self.options.autoOpen).valueOf() === true){
                 this.open();
             }
+            this.element.removeClass('hidden');
             this._trigger('ready');
             this._ready();
         },
@@ -160,8 +166,7 @@
             });
         },
         _createSourceTree: function(source, sourceEl, scale, type, isroot){
-            var self = this;
-            if(sourceEl.type){ // source
+            if(sourceEl.type){
                 var li = "";
                 sourceEl.layers = [];
                 for(var i = 0; i < sourceEl.configuration.children.length; i++){
@@ -172,7 +177,7 @@
                 var li = this.template.clone();
                 li.removeClass('hide-elm');
                 li.attr('data-id', sourceEl.options.id);
-                li.attr('data-sourceid', source.id)
+                li.attr('data-sourceid', source.id);
                 var nodeType = this._getNodeType(sourceEl, isroot);
                 li.attr('data-type', nodeType).attr('data-title', sourceEl.options.title);
                 if(nodeType === this.consts.root || nodeType === this.consts.group){
@@ -186,7 +191,7 @@
                     if(config.toggle === true)
                         li.addClass("showLeaves").find(".iconFolder").addClass("iconFolderActive");
                     else
-                        li.removeClass("showLeaves").find(".iconFolder").removeClass("iconFolderActive");// todo
+                        li.removeClass("showLeaves").find(".iconFolder").removeClass("iconFolderActive");
                 }
                 li.addClass(config.reorder);
                 li.find('.layer-state').attr('title', config.visibility.tooltip);
@@ -199,38 +204,13 @@
                 li.find('.layer-title:first').attr('title', sourceEl.options.title).text(this._subStringText(sourceEl.options.title));
                 if(config.toggleable)
                     li.addClass('toggleable');
-                if(!this.options.layerMenu){
+                if(this.options.menu.length === 0){
                     li.find('.layer-menu-btn').remove();
-                }else{
-                    var menu = li.find('.layer-menu:first');
-                    if(!sourceEl.options.legend){
-                        menu.find('.layer-legend').addClass('btn-disabled');
-                    }else{
-                        menu.find('.layer-legend').bind("click", function(e){
-                            e.stopPropagation();
-                            self._showLegend(sourceEl);
-                        });
-                    }
-                    menu.find('.layer-kmlexport').bind("click", function(e){
-                        e.stopPropagation();
-                        self._exportKml(sourceEl);
-                    });
-                    if(sourceEl.options.maxScale !== null){
-                        menu.find('.layer-zoom').addClass('btn-disabled');
-                    }else{
-                        menu.find('.layer-zoom').bind("click", function(e){
-                            e.stopPropagation();
-                            self._zoomToLayer(sourceEl);
-                        });
-                    }
-                    menu.find('.layer-metadata').bind("click", function(e){
-                        e.stopPropagation();
-                        self._showMetadata(sourceEl);
-                    });
-
                 }
                 if(!this.options.layerRemove)
                     li.find('.iconRemove').remove();
+				if(!this.options.layerInfo)
+					li.find('.iconInfo').remove();
                 if(sourceEl.children){
                     li.find('ul:first').attr('id', 'list-' + sourceEl.options.id);
                     if(config.toggle){
@@ -246,8 +226,7 @@
             return li;
         },
         _createTreeNode: function(source, sourceEl, scale, layerToAdd, parent, type, isroot, found){
-            var self = this;
-            if(sourceEl.type){ // source
+            if(sourceEl.type){
                 var li = "";
                 for(var i = 0; i < sourceEl.configuration.children.length; i++){
                     li = this._createTreeNode(source, sourceEl.configuration.children[i], scale, layerToAdd, parent, sourceEl.type, true, false);
@@ -263,9 +242,9 @@
                     var nodeType = this._getNodeType(sourceEl, isroot);
                     li.attr('data-type', nodeType).attr('data-title', sourceEl.options.title);
 
-                    if(nodeType == this.consts.root){
+                    if(nodeType === this.consts.root){
                         li.addClass("serviceContainer showLeaves").find(".iconFolder").addClass("iconFolderActive");
-                    }else if(nodeType == this.consts.group){
+                    }else if(nodeType === this.consts.group){
                         li.addClass("groupContainer showLeaves").find(".iconFolder").addClass("iconFolderActive");
                     }
                     li.addClass(config.reorder);
@@ -279,34 +258,8 @@
                     li.find('.layer-title:first').attr('title', sourceEl.options.title).text(this._subStringText(sourceEl.options.title));
                     if(config.toggleable)
                         li.addClass('toggleable');
-                    if(!this.options.layerMenu){
+                    if(this.options.menu.length === 0){
                         li.find('.layer-menu-btn').remove();
-                    }else{
-                        var menu = li.find('.layer-menu:first');
-                        if(!sourceEl.options.legend){
-                            menu.find('.layer-legend').addClass('btn-disabled');
-                        }else{
-                            menu.find('.layer-legend').bind("click", function(e){
-                                e.stopPropagation();
-                                self._showLegend(sourceEl);
-                            });
-                        }
-                        menu.find('.layer-kmlexport').bind("click", function(e){
-                            e.stopPropagation();
-                            self._exportKml(sourceEl);
-                        });
-                        if(sourceEl.options.maxScale !== null){
-                            menu.find('.layer-zoom').addClass('btn-disabled');
-                        }else{
-                            menu.find('.layer-zoom').bind("click", function(e){
-                                e.stopPropagation();
-                                self._zoomToLayer(sourceEl);
-                            });
-                        }
-                        menu.find('.layer-metadata').bind("click", function(e){
-                            e.stopPropagation();
-                            self._showMetadata(sourceEl);
-                        });
                     }
                     if(!this.options.layerRemove)
                         li.find('.iconRemove').remove();
@@ -346,7 +299,6 @@
             if(!this.created || !options.added)
                 return;
             var added = options.added;
-            //window.console && console.log("layertree _onSourceAdded");
             var before = added.after, after = added.before;
             if(added.source.configuration.baseSource && !this.options.showBaseSource){
                 return;
@@ -394,10 +346,8 @@
             this._reset();
         },
         _onSourceChanged: function(event, options){
-//            window.console && console.log("layertree _onSourceChanged", options);
             if(options.changed && options.changed.children){
                 this._changeChildren(options.changed);
-//                this.resetSource(this.model.getSource(options.changed.sourceIdx));
             }else if(options.changed && options.changed.childRemoved){
                 this._removeChild(options.changed);
             }
@@ -465,19 +415,16 @@
             var self = this;
             if(changed && changed.sourceIdx && changed.childRemoved){
                 var source = this.model.getSource(changed.sourceIdx);
-                // TODO check source id ?
                 $('ul.layers:first li[data-id="' + changed.childRemoved.layer.options.id + '"]', self.element).remove();
             }
         },
         _onSourceRemoved: function(event, removed){
-//            window.console && console.log("layertree _onSourceRemoved");
             if(removed && removed.source && removed.source.id){
                 $('ul.layers:first li[data-sourceid="' + removed.source.id + '"]', this.element).remove();
                 this._setSourcesCount();
             }
         },
-        _onSourceLoadStart: function(event, option){ // sets "loading" for layers
-//            window.console && console.log("layertree _onSourceLoadStart");
+        _onSourceLoadStart: function(event, option){
             if(option.source && this.sourceAtTree[option.source.id ]){
                 this.loadStarted[option.source.id ] = true;
                 var source_li = $('li[data-sourceid="' + option.source.id + '"][data-type="root"]', this.element);
@@ -486,8 +433,7 @@
                 }
             }
         },
-        _onSourceLoadEnd: function(event, option){ // removes "loading" from layers
-//            window.console && console.log("layertree _onSourceLoadEnd");
+        _onSourceLoadEnd: function(event, option){
             if(option.source && this.sourceAtTree[option.source.id ] && this.loadStarted[option.source.id]){
                 this.loadStarted[option.source.id] = false;
                 var source_li = $('li[data-sourceid="' + option.source.id + '"][data-type="root"]', this.element);
@@ -496,7 +442,6 @@
             }
         },
         _onSourceLoadError: function(event, option){
-//            window.console && console.log("layertree _onSourceLoadError");
             if(option.source && this.sourceAtTree[option.source.id ] && this.loadStarted[option.source.id]){
                 this.loadStarted[option.source.id] = false;
                 var source_li = $('li[data-sourceid="' + option.source.id + '"][data-type="root"]', this.element);
@@ -603,16 +548,70 @@
             this.model.changeSource({change: tochange});
         },
         _toggleMenu: function(e){
+            var self = this;
+            function createMenu($element, sourceId, layerId){
+                var source = self.model.findSource({id: sourceId})[0];
+                var menu = $(self.menuTemplate.clone().attr("data-menuLayerId", layerId).attr("data-menuSourceId", sourceId));
+                if($element.parents('li:first').attr('data-type') === self.consts.root){
+                } else {
+                    menu.find('#layer-opacity').remove();
+                    menu.find('#layer-opacity-title').remove();
+                }
+                menu.removeClass('hidden');
+                $element.append(menu);
+                $(menu).on('click mousedown mousemove', function(e){
+                    e.stopPropagation();
+                });
+                if($.inArray("opacity", self.options.menu) !== -1 && menu.find('#layer-opacity').length > 0){
+                    new Dragdealer('layer-opacity', {
+                        x: source.configuration.options.opacity,
+                        horizontal: true,
+                        vertical: false,
+                        steps: 100,
+                        handleClass: "layer-opacity-handle",
+                        animationCallback: function(x, y){
+                            var percentage = Math.round(x * 100);
+                            $("#layer-opacity").find(".layer-opacity-handle").text(percentage);
+                            self._setOpacity(self.model.findSource({id: sourceId})[0], percentage/100.0);
+                        }
+                    });
+                }
+                if($.inArray("zoomtolayer", self.options.menu) !== -1 && menu.find('.layer-zoom').length > 0){
+                    if(self.model.getLayerExtents({sourceId: sourceId, layerId: layerId, inherit: true})){
+                        $('.layer-zoom', menu).removeClass('inactive').on('click', $.proxy(self._zoomToLayer, self));
+                    }
+                }
+            }
+            function removeMenu($element){
+                $('.layer-zoom').off('click');
+                $('#layer-menu').off('click').remove();
+            }
+            var $btnMenu = $(e.target);
+            var currentLayerId = $btnMenu.parents('li:first').attr("data-id");
+            var currentSourceId = $btnMenu.parents('li[data-sourceid]:first').attr("data-sourceid");
+            if($('#layer-menu').length !== 0){
+                var layerIdMenu = $('#layer-menu').attr("data-menuLayerId");
+                removeMenu($('#layer-menu'));
+                if(layerIdMenu !== currentLayerId){
+                    createMenu($btnMenu, currentSourceId, currentLayerId);
+                }
+
+            }else{
+                createMenu($btnMenu, currentSourceId, currentLayerId);
+            }
+        },
+        _setOpacity: function(source, opacity){
+            this.model.setOpacity(source, opacity);
         },
         _removeSource: function(e){
             var layer_type = $(e.target).parents("li:first").attr("data-type");
             var sourceId = $(e.target).parents('li[data-sourceid]:first').attr('data-sourceid');
-            if(sourceId && layer_type && this.consts.root === layer_type){ // remove source
+            if(sourceId && layer_type && this.consts.root === layer_type){
                 this.model.removeSource({remove: {sourceIdx: {id: sourceId}}});
-            }else if(sourceId && layer_type && this.consts.group === layer_type){// remove group layer
+            }else if(sourceId && layer_type && this.consts.group === layer_type){
                 var layer_id = $(e.target).parents("li:first").attr("data-id");
                 this.model.changeSource({change: {layerRemove: {sourceIdx: {id: sourceId}, layer: {options: {id: layer_id}}}}});
-            }else if(sourceId && layer_type && this.consts.simple === layer_type){// remove group layer
+            }else if(sourceId && layer_type && this.consts.simple === layer_type){
                 var layer_id = $(e.target).parents("li:first").attr("data-id");
                 this.model.changeSource({change: {layerRemove: {sourceIdx: {id: sourceId}, layer: {options: {id: layer_id}}}}});
             }
@@ -622,7 +621,13 @@
         },
         _exportKml: function(elm){
         },
-        _zoomToLayer: function(elm){
+        _zoomToLayer: function(e){
+            var options = {
+                sourceId: $(e.target).parents('div.layer-menu:first').attr("data-menuSourceId"),
+                layerId: $(e.target).parents('div.layer-menu:first').attr("data-menuLayerId"),
+                inherit: true
+            };
+            this.model.zoomToLayer(options);
         },
         _showMetadata: function(elm){
         },
@@ -664,13 +669,14 @@
                     this.popup = new Mapbender.Popup2({
                         title: self.element.attr('title'),
                         modal: false,
+                        resizable: true,
                         draggable: true,
                         closeButton: false,
-                        closeOnPopupCloseClick: false,
                         closeOnESC: false,
                         content: [self.element.show()],
                         destroyOnClose: true,
                         width: 350,
+                        height: 500,
                         cssClass: 'customLayertree',
                         buttons: {
                             'ok': {
@@ -683,6 +689,7 @@
                         }
                     });
                     this._reset();
+                    this.popup.$element.on('close', $.proxy(this.close, this));
                 }else{
                     this._reset();
                     this.popup.open();

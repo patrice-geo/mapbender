@@ -47,7 +47,6 @@
                     modal: false,
                     closeButton: false,
                     closeOnESC: false,
-                    closeOnPopupCloseClick: false,
                     cssClass: 'mb-wmcEditor',
                     content: [$.ajax({
                             url: self.elementUrl + 'list',
@@ -62,6 +61,8 @@
                             }})],
                     destroyOnClose: true,
                     width: 480,
+                    height: 500,
+                    resizable: true,
                     buttons: {
                         'cancel': {
                             label: Mapbender.trans("mb.wmc.element.wmceditor.popup.btn.cancel"),
@@ -90,6 +91,7 @@
                         }
                     }
                 });
+                this.popup.$element.on('close', $.proxy(this.close, this));
                 $(".popup").find(".buttonYes, .buttonBack").hide();
             }else{
                 $(".popupContent", self.popup.$element).empty();

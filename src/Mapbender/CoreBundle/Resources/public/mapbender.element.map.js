@@ -3,11 +3,11 @@
     $.widget("mapbender.mbMap", {
         options: {
             poiIcon: {
-                image: 'bundles/mapbendercore/image/marker_fett.gif',
-                width: 60,
-                height: 60,
-                xoffset: -32,
-                yoffset: -32
+                image: 'bundles/mapbendercore/image/pin_red.png',
+                width: 32,
+                height: 41,
+                xoffset: -6,
+                yoffset: -38
             }
         },
         elementUrl: null,
@@ -240,6 +240,22 @@
             return scales;
         },
         /**
+         * Sets opacity to source
+         * @param {spource} source
+         * @param {float} opacity
+         */
+        setOpacity: function(source, opacity){
+            this.model.setOpacity(source, opacity);
+        },
+        /**
+         * Zooms to layer
+         * @param {object} options of form { sourceId: XXX, layerId: XXX }
+         */
+        zoomToLayer: function(options){
+            this.model.zoomToLayer(options);
+        },
+
+        /**
          *
          */
         ready: function(callback) {
@@ -268,8 +284,8 @@
         /**
          * Turns off the highlight layer at map
          */
-        highlightOff: function() {
-            this.model.highlightOff();
+        highlightOff: function(features) {
+            this.model.highlightOff(features);
         },
         /**
          * Loads the srs definitions from server

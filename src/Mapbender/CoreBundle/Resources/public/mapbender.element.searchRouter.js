@@ -40,6 +40,7 @@
             // bind form reset to reset search model
             this.element.delegate('.search-forms form', 'reset', function(){
                 self.searchModel.reset();
+                self._getLayer().removeAllFeatures();
             });
             // bind form submit to send search model
             this.element.delegate('.search-forms form', 'submit', function(evt){
@@ -113,11 +114,12 @@
                         title: this.element.attr('title'),
                         draggable: true,
                         modal: false,
-                        closeButton: false,
-                        closeOnPopupCloseClick: false,
+                        closeButton: true,
                         closeOnESC: false,
                         content: this.element,
                         width: 450,
+                        resizable: true,
+                        height: 500,
                         buttons: {
                             'cancel': {
                                 label: Mapbender.trans('mb.core.searchrouter.popup.btn.cancel'),
@@ -136,6 +138,7 @@
                             }
                         }
                     });
+                    this.popup.$element.on('close', $.proxy(this.close, this));
                 }else{
 
                 }

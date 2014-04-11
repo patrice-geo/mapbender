@@ -5,16 +5,16 @@
  */
 namespace Mapbender\CoreBundle\Component;
 
-use Assetic\Asset\AssetCollection;
 use Assetic\Asset\AssetReference;
 use Assetic\Asset\FileAsset;
 use Assetic\FilterManager;
 use Assetic\Asset\StringAsset;
-use Assetic\AssetManager;
 use Assetic\Factory\AssetFactory;
 use Mapbender\CoreBundle\Entity\Application as Entity;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+use Symfony\Component\Security\Acl\Exception\NotAllAclsFoundException;
 
 /**
  * Application is the main Mapbender3 class.
@@ -68,11 +68,11 @@ class Application
         $this->urls = $urls;
     }
 
-    /*     * ***********************************************************************
+    /*************************************************************************
      *                                                                       *
      *                    Configuration entity handling                      *
      *                                                                       *
-     * *********************************************************************** */
+     *************************************************************************/
 
     /**
      * Get the configuration entity.
@@ -84,11 +84,11 @@ class Application
         return $this->entity;
     }
 
-    /*     * ***********************************************************************
+    /*************************************************************************
      *                                                                       *
      *             Shortcut functions for leaner Twig templates              *
      *                                                                       *
-     * *********************************************************************** */
+     *************************************************************************/
 
     /**
      * Get the application ID
@@ -130,11 +130,11 @@ class Application
         return $this->entity->getDescription();
     }
 
-    /*     * ***********************************************************************
+    /*************************************************************************
      *                                                                       *
      *                              Frontend stuff                           *
      *                                                                       *
-     * *********************************************************************** */
+     *************************************************************************/
 
     /**
      * Render the application
@@ -149,6 +149,24 @@ class Application
         $js = true, $trans = true)
     {
         return $this->getTemplate()->render($format, $html, $css, $js, $trans);
+    }
+
+    static public function listAssets()
+    {
+        $assets = array(
+            'js' => array(
+                '@MapbenderCoreBundle/Resources/public/stubs.js',
+                '@MapbenderCoreBundle/Resources/public/mapbender.application.js',
+                '@MapbenderCoreBundle/Resources/public/mapbender.model.js',
+                '@MapbenderCoreBundle/Resources/public/mapbender.trans.js',
+                '@MapbenderCoreBundle/Resources/public/mapbender.application.wdt.js',
+                ),
+            'css' => array(
+            ),
+            'trans' => array(
+                '@MapbenderCoreBundle/Resources/public/mapbender.trans.js',
+            ));
+        return $assets;
     }
 
     /**
@@ -166,37 +184,28 @@ class Application
         }
 
         // Add all assets to an asset manager first to avoid duplication
-        $assets = new AssetManager();
+        //$assets = new LazyAssetManager($this->container->get('assetic.asset_factory'));
+        $assets = array();
 
-        if ($type === 'js') {
-            // Mapbender API
-            $file = '@MapbenderCoreBundle/Resources/public/stubs.js';
-            $this->addAsset($assets, $type, $file);
-            $file = '@MapbenderCoreBundle/Resources/public/mapbender.application.js';
-            $this->addAsset($assets, $type, $file);
-            $file = '@MapbenderCoreBundle/Resources/public/mapbender.model.js';
-            $this->addAsset($assets, $type, $file);
-            // Translation API
-            $file = '@MapbenderCoreBundle/Resources/public/mapbender.trans.js';
-            $this->addAsset($assets, $type, $file);
-            // WDT fixup
-            if ($this->container->has('web_profiler.debug_toolbar')) {
-                $file = '@MapbenderCoreBundle/Resources/public/mapbender.application.wdt.js';
-                $this->addAsset($assets, $type, $file);
-            }
-        }
-        if ($type === 'css') {
-            //$file = '@MapbenderCoreBundle/Resources/public/mapbender.application.css';
-            //$this->addAsset($assets, $type, $file);
-        }
-
-        if ($type === 'trans') {
-            $file = '@MapbenderCoreBundle/Resources/public/mapbender.trans.js';
-            $this->addAsset($assets, $type, $file);
+        $_assets = $this::listAssets();
+        foreach($_assets[$type] as $asset) {
+            $this->addAsset($assets, $type, $asset);
         }
 
         // Load all elements assets
         $translations = array();
+
+        foreach ($this->getTemplate()->getAssets($type) as $asset) {
+            if ($type === 'trans') {
+                $elementTranslations = json_decode($this->container->get('templating')->render($asset),
+                    true);
+                $translations = array_merge($translations, $elementTranslations);
+            } else {
+                $file = $this->getReference($this->template, $asset);
+                $this->addAsset($assets, $type, $file);
+            }
+        }
+
         foreach ($this->getElements() as $region => $elements) {
             foreach ($elements as $element) {
                 $element_assets = $element->getAssets();
@@ -215,6 +224,7 @@ class Application
                 }
             }
         }
+
         $layerTranslations = array();
         // Load all layer assets
         foreach ($this->getLayersets() as $layerset) {
@@ -238,10 +248,15 @@ class Application
         foreach ($layerTranslations as $key => $value) {
             $translations = array_merge($translations, $value);
         }
+        if ($type === 'trans') {
+            $transAsset = new StringAsset('Mapbender.i18n = ' . json_encode($translations,
+                    JSON_FORCE_OBJECT) . ';');
+            $this->addAsset($assets, $type, $transAsset);
+        }
 
-        // Load the template assets last, so it can easily overwrite element
+        // Load the late template assets last, so it can easily overwrite element
         // and layer assets for application specific styling for example
-        foreach ($this->getTemplate()->getAssets($type) as $asset) {
+        foreach ($this->getTemplate()->getLateAssets($type) as $asset) {
             if ($type === 'trans') {
                 $elementTranslations = json_decode($this->container->get('templating')->render($asset),
                     true);
@@ -251,11 +266,7 @@ class Application
                 $this->addAsset($assets, $type, $file);
             }
         }
-        if ($type === 'trans') {
-            $transAsset = new StringAsset('Mapbender.i18n = ' . json_encode($translations,
-                    JSON_FORCE_OBJECT) . ';');
-            $assets->set('i18n', $transAsset);
-        }
+
         // Load extra assets given by application
         $extra_assets = $this->getEntity()->getExtraAssets();
         if (is_array($extra_assets) && array_key_exists($type, $extra_assets)) {
@@ -265,46 +276,13 @@ class Application
             }
         }
 
-        // Get all assets out of the manager and into an collection
-        $collection = new AssetCollection();
-        foreach ($assets->getNames() as $name) {
-            $collection->add($assets->get($name));
-        }
-
-        return $collection;
+        return $assets;
     }
 
-    private function addAsset($manager, $type, $reference)
+    private function addAsset(&$manager, $type, $reference)
     {
-        $locator = $this->container->get('file_locator');
-        $file = $locator->locate($reference);
-
-        // This stuff is needed for CSS rewrite. This will use the file contents
-        // from the bundle directory, but the path inside the public folder
-        // for URL rewrite
-        $sourceBase = null;
-        $sourcePath = null;
-        if ($reference[0] == '@') {
-            // Bundle name
-            $bundle = substr($reference, 1, strpos($reference, '/') - 1);
-            // Installation root directory
-            $root = dirname($this->container->getParameter('kernel.root_dir'));
-            // Path inside the Resources/public folder
-            $assetPath = substr($reference,
-                strlen('@' . $bundle . '/Resources/public'));
-
-            // Path for the public version
-            $public = $root . '/web/bundles/' .
-                preg_replace('/bundle$/', '', strtolower($bundle)) .
-                $assetPath;
-
-            $sourceBase = '';
-            $sourcePath = $public;
-        }
-
-        $asset = new FileAsset($file, array(), $sourceBase, $sourcePath);
-        $name = str_replace(array('@', '/', '.', '-'), '__', $reference);
-        $manager->set($name, $asset);
+        $manager[] = $reference;
+        return $manager;
     }
 
     /**
@@ -374,7 +352,9 @@ class Application
 
     /**
      * Build an Assetic reference path from a given objects bundle name(space)
-     * and the filename/path within that bundles Resources/public folder
+     * and the filename/path within that bundles Resources/public folder.
+     *
+     * @todo: This is duplicated in DumpMapbenderAssetsCommand
      *
      * @param object $object
      * @param string $file
@@ -417,11 +397,34 @@ class Application
     {
         if ($this->elements === null) {
             $securityContext = $this->container->get('security.context');
+            $aclProvider = $this->container->get('security.acl.provider');
+            
+            // preload acl in one single sql query
+            $oids = array();
+            $acls;
+            foreach ($this->entity->getElements() as $entity) {
+                $oids[] = ObjectIdentity::fromDomainObject($entity);
+            }
+            try {
+                $aclProvider->findAcls($oids);        
+            } catch(NotAllAclsFoundException $e) { 
+                $acls = $e->getPartialResult();
+            } catch(\Exception $e) {}
+            
             // Set up all elements (by region)
             $this->elements = array();
             foreach ($this->entity->getElements() as $entity) {
                 $application_entity = $this->getEntity();
-                if ($application_entity::SOURCE_YAML === $application_entity->getSource()
+                if ($application_entity::SOURCE_DB === $application_entity->getSource()){
+                    try {
+                        // If no ACL exists, an exception is thrown
+                        $acl = $aclProvider->findAcl(ObjectIdentity::fromDomainObject($entity));
+                        // An empy ACL may exist, too
+                        if(count($acl->getObjectAces()) > 0 && !$securityContext->isGranted('VIEW', $entity)){
+                            continue;
+                        }
+                    } catch(\Exception $e) {}
+                } else if ($application_entity::SOURCE_YAML === $application_entity->getSource()
                     && count($entity->yaml_roles)) {
                     $passed = false;
                     foreach ($entity->yaml_roles as $role) {
@@ -471,7 +474,7 @@ class Application
 
     /**
      * Returns all layersets
-     * 
+     *
      * @return array the layersets
      */
     public function getLayersets()

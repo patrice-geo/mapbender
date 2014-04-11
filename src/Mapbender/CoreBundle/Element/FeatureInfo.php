@@ -48,8 +48,10 @@ class FeatureInfo extends Element
     {
         return array(
             'tooltip' => 'Feature Info Dialog',
+            'type' => 'dialog',
             "autoOpen" => false,
             "deactivateOnClose" => true,
+            "printResult" => false,
             "target" => null);
     }
 
@@ -72,7 +74,7 @@ class FeatureInfo extends Element
     /**
      * @inheritdoc
      */
-    public function getAssets()
+    static public function listAssets()
     {
         return array(
             'js' => array(

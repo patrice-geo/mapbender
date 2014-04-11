@@ -34,6 +34,11 @@ abstract class Template
         throw new \RuntimeException('getTitle must be implemented in subclasses');
     }
 
+    static public function listAssets()
+    {
+        return array();
+    }
+
     /**
      * Get the element assets.
      *
@@ -51,12 +56,18 @@ abstract class Template
      */
     public function getAssets($type)
     {
-        if($type !== 'css' && $type !== 'js' && $type !== 'trans')
-        {
-            throw new \RuntimeException('The asset type \'' . $type .
-                    '\' is not supported.');
-        }
+        $assets = self::listAssets();
+        return array_key_exists($type, $assets) ? $assets[$type] : array();
+    }
 
+    /**
+     * Get assets for late including. These will be appended to the asset output last.
+     * Remember to list them in listAssets!
+     * @param string $type Asset type to list, can be 'css' or 'js'
+     * @return array
+     */
+    public function getLateAssets($type)
+    {
         return array();
     }
 
@@ -80,7 +91,7 @@ abstract class Template
      * @return string $html The rendered HTML
      */
     abstract public function render($format = 'html', $html = true, $css = true, $js = true);
-    
+
     /**
      * Get the available regions properties.
      *
@@ -90,6 +101,6 @@ abstract class Template
     {
         return array();
     }
-    
+
 }
 

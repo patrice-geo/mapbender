@@ -5,7 +5,7 @@ use Mapbender\CoreBundle\Component\Template;
 
 /**
  * Template Fullscreen
- * 
+ *
  * @author Christian Wygoda
  */
 class Fullscreen extends Template
@@ -16,9 +16,9 @@ class Fullscreen extends Template
     public static function getRegionsProperties()
     {
         return array(
-            'sidepane' => array(
-                'tabs' => array(
-                    'state' => true,
+            'sidepane' => array
+(                'tabs' => array(
+                    'state' => false,
                     'options' => array('icon' => 'XXX')
                 )
             )
@@ -36,17 +36,38 @@ class Fullscreen extends Template
     /**
      * @inheritdoc
      */
-    public function getAssets($type)
+    static public function listAssets()
     {
-        parent::getAssets($type);
         $assets = array(
-            'css' => array('@FOMCoreBundle/Resources/public/css/frontend/fullscreen.css'),
+            'css' => array('@MapbenderCoreBundle/Resources/public/sass/theme/mapbender3.scss',
+                           '@MapbenderCoreBundle/Resources/public/sass/template/fullscreen.scss'),
             'js' => array('@FOMCoreBundle/Resources/public/js/widgets/popup.js',
-                '@FOMCoreBundle/Resources/public/js/frontend/sidepane.js',
-                '@FOMCoreBundle/Resources/public/js/frontend/tabcontainer.js'),
+                          '@FOMCoreBundle/Resources/public/js/frontend/sidepane.js',
+                          '@FOMCoreBundle/Resources/public/js/frontend/tabcontainer.js'),
             'trans' => array()
         );
+        return $assets;
+    }
 
+    /**
+     * @inheritdoc
+     */
+    public function getLateAssets($type)
+    {
+        $assets = array(
+            'css' => array(),
+            'js' => array(),
+            'trans' => array()
+        );
+        return $assets[$type];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getAssets($type)
+    {
+        $assets = $this::listAssets();
         return $assets[$type];
     }
 
@@ -78,5 +99,4 @@ class Fullscreen extends Template
                     'region_props' => $region_props,
                     'default_region_props' => $default_region_props));
     }
-
 }

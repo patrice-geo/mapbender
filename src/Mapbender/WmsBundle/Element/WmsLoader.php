@@ -7,7 +7,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * WmsLoader
- * 
+ *
  * @author Karim Malhas
  * @author Paul Schmidt
  */
@@ -65,17 +65,52 @@ class WmsLoader extends Element
     /**
      * @inheritdoc
      */
-    public function getAssets()
+    static public function listAssets()
     {
         $files = array(
             'js' => array(
                 '@FOMCoreBundle/Resources/public/js/widgets/popup.js',
-                'mapbender.element.wmsloader.js'),
-            'css' => array(),
+                'mapbender.element.wmsloader.js',
+                '@MapbenderCoreBundle/Resources/public/mapbender.distpatcher.js'),
+            'css' => array('@MapbenderWmsBundle/Resources/public/sass/element/wmsloader.scss'),
             'trans' => array('MapbenderWmsBundle:Element:wmsloader.json.twig'));
+        return $files;
+    }
+    
+     /**
+     * @inheritdoc
+     */
+    public function getConfiguration()
+    {
+        $configuration = parent::getConfiguration();
+        $wms_url = $this->container->get('request')->get('wms_url');
+        if ($wms_url) {
+            $all = $this->container->get('request')->query->all();
+            foreach ($all as $key => $value) {
+                if(strtolower($key) === "version" && stripos($wms_url, "version") === false){
+                    $wms_url .= "&version=" . $value;
+                } else if(strtolower($key) === "request" && stripos($wms_url, "request") === false){
+                    $wms_url .= "&request=" . $value;
+                } else if(strtolower($key) === "service" && stripos($wms_url, "service") === false){
+                    $wms_url .= "&service=" . $value;
+                }
+            }
+            $configuration['wms_url'] = urldecode($wms_url);
+        }
+        return $configuration;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getAssets()
+    {
+        $files = self::listAssets();
+
         $config = $this->getConfiguration();
-        if (isset($config['useDeclarative']) && $config['useDeclarative'] === true) {
-            $files['js'][] = "@MapbenderCoreBundle/Resources/public/mapbender.distpatcher.js";
+        if(!(isset($config['useDeclarative']) && $config['useDeclarative'] === true)) {
+            $idx = array_search('@MapbenderCoreBundle/Resources/public/mapbender.distpatcher.js', $files['js']);
+            unset($files['js'][$idx]);
         }
         return $files;
     }
@@ -131,8 +166,8 @@ class WmsLoader extends Element
     }
 
     /**
-     * Returns 
-     * 
+     * Returns
+     *
      * @return \Symfony\Component\HttpFoundation\Response a json encoded result.
      */
     protected function getCapabilities()
@@ -152,8 +187,8 @@ class WmsLoader extends Element
     }
 
     /**
-     * Returns 
-     * 
+     * Returns
+     *
      * @return \Symfony\Component\HttpFoundation\Response a json encoded result.
      */
     protected function signeUrl()
@@ -166,8 +201,8 @@ class WmsLoader extends Element
     }
 
     /**
-     * Returns 
-     * 
+     * Returns
+     *
      * @return \Symfony\Component\HttpFoundation\Response a json encoded result.
      */
     protected function signeSources()

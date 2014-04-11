@@ -66,6 +66,10 @@
         <source>mb.wms.wmsloader.repo.view.label.layers</source>
         <target>Layer</target>
       </trans-unit>
+      <trans-unit id="39a09166a2c34855ef0a5bee60dcc89d" resname="mb.wms.wmsloader.repo.view.label.uuid">
+        <source>mb.wms.wmsloader.repo.view.label.uuid</source>
+        <target>UUID</target>
+      </trans-unit>
       <trans-unit id="b9ab22fb5e966eee1446b5fc850f25cb" resname="mb.wms.wmsloader.repo.view.label.title">
         <source>mb.wms.wmsloader.repo.view.label.title</source>
         <target>Titel</target>
@@ -77,10 +81,6 @@
       <trans-unit id="01e5d3ca805bba670db1220f2d284caf" resname="mb.wms.wmsloader.repo.view.label.version">
         <source>mb.wms.wmsloader.repo.view.label.version</source>
         <target>Version</target>
-      </trans-unit>
-      <trans-unit id="39a09166a2c34855ef0a5bee60dcc89d" resname="mb.wms.wmsloader.repo.view.label.uuid">
-        <source>mb.wms.wmsloader.repo.view.label.uuid</source>
-        <target>UUID</target>
       </trans-unit>
       <trans-unit id="4b617e0d42bf0b86c4f9c0c81ea37b23" resname="mb.wms.wmsloader.repo.view.label.originurl">
         <source>mb.wms.wmsloader.repo.view.label.originurl</source>
@@ -178,6 +178,10 @@
         <source>mb.wms.wmsloader.repo.instance.label.visible</source>
         <target>Sichtbarkeit</target>
       </trans-unit>
+      <trans-unit id="12c86823218d7a3fa8652b494a514cac" resname="mb.wms.wmsloader.repo.instance.label.basesource">
+        <source>mb.wms.wmsloader.repo.instance.label.basesource</source>
+        <target>Basesource</target>
+      </trans-unit>
       <trans-unit id="80da76418871853e63f9b3874790595e" resname="mb.wms.wmsloader.repo.instance.label.proxy">
         <source>mb.wms.wmsloader.repo.instance.label.proxy</source>
         <target>Proxy</target>
@@ -216,7 +220,7 @@
       </trans-unit>
       <trans-unit id="b117b1f45a600d80fb7bb9861e2f86b5" resname="mb.wms.wmsloader.repo.instance.label.toggle">
         <source>mb.wms.wmsloader.repo.instance.label.toggle</source>
-        <target>umschalten</target>
+        <target>aufklappen</target>
       </trans-unit>
       <trans-unit id="99c32582fc37600097bc585b40948c0e" resname="mb.wms.wmsloader.repo.instance.label.reorder">
         <source>mb.wms.wmsloader.repo.instance.label.reorder</source>

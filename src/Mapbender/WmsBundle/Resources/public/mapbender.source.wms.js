@@ -43,7 +43,8 @@ $.extend(true, Mapbender, {
                     singleTile: !layerDef.configuration.options.tiled,
                     attribution: layerDef.configuration.options.attribution, // attribution add !!!
                     minScale: rootLayer.minScale,
-                    maxScale: rootLayer.maxScale
+                    maxScale: rootLayer.maxScale,
+                    transitionEffect: 'resize'
                 };
 
                 return mqLayerDef;
@@ -637,26 +638,7 @@ $.extend(true, Mapbender, {
                             }
                         };
                     }
-                    if(layer.options.minScale){
-                        if(layer.options.minScale <= scale){
-                            layer.state.outOfScale = false;
-                        }else{
-                            layer.state.outOfScale = true;
-                        }
-                    }else{
-                        layer.state.outOfScale = false;
-                    }
-                    if(!layer.state.outOfScale){
-                        if(layer.options.maxScale){
-                            if(layer.options.maxScale > scale){
-                                layer.state.outOfScale = false;
-                            }else{
-                                layer.state.outOfScale = true;
-                            }
-                        }else{
-                            layer.state.outOfScale = false;
-                        }
-                    }
+                    layer.state.outOfScale = (layer.options.minScale ? layer.options.minScale <= scale : true) && (layer.options.maxScale ? layer.options.maxScale > scale : true) ? false : true;
                     /* @TODO outOfBounds for layers ?  */
                     if(layer.children){
                         if(parentState.state.visibility
@@ -720,7 +702,7 @@ $.extend(true, Mapbender, {
                 }
             },
             /**
-             * @param {object} source source
+             * @param {object} source wms source
              * @param {object} changeOptions options in form of:
              * {layers:{'LAYERNAME': {options:{treeOptions:{selected: bool,info: bool}}}}}
              * @param {boolean} merge
@@ -775,6 +757,30 @@ $.extend(true, Mapbender, {
                 var tochange = {sourceIdx: {id: source.id}, options: {children: {}, type: 'selected'}};
                 setSelected(source.configuration.children[0], null, changeOptions, tochange.options.children, selectedOther, merge);
                 return {change: tochange};
+            },
+            /**
+             * Gets a layer extent or an extent from layer parents
+             * @param {object} source wms source
+             * @param {object} changeOptions options in form of:
+             * @returns {object} extent of form {projectionCode: OpenLayers.Bounds.toArray, ...}
+             */
+            getLayerExtents: function(source, layerId, inherit){
+                function _layerExtent(layer, extents, toFindLayerId, inherit){
+                    if(layer.options.id === toFindLayerId){
+                        if(layer.options.bbox)
+                            extents = layer.options.bbox;
+                        return;
+                    }
+                    if(layer.children){
+                        for(var j = 0; j < layer.children.length; j++){
+                            var exts = inherit ? (layer.options.bbox ? layer.options.bbox : extents) : null;
+                            _layerExtent(layer.children[j], layer.options.bbox ? layer.options.bbox : extents, toFindLayerId, inherit);
+                        }
+                    }
+                }
+                var extents = inherit ? source.configuration.options.bbox : null;
+                _layerExtent(source.configuration.children[0], extents, layerId, inherit);
+                return extents;
             }
         }
     }

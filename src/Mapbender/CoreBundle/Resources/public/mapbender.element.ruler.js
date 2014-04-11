@@ -58,7 +58,8 @@
                         .concat(['measuremodify']),
                 handlerOptions: {
                     layerOptions: {
-                        styleMap: styleMap
+                        styleMap: styleMap,
+                        name: 'rulerlayer'
                     }
                 },
                 persist: this.options.persist,
@@ -103,12 +104,13 @@
                     title: self.element.attr('title'),
                     modal: false,
                     draggable: true,
+                    resizable: true,
                     closeButton: false,
-                    closeOnESC: false,
+                    closeOnESC: true,
                     destroyOnClose: true,
-                    closeOnPopupCloseClick: false,
                     content: self.container,
                     width: 300,
+                    height: 300,
                     buttons: {
                         'ok': {
                             label: Mapbender.trans("mb.core.ruler.popup.btn.ok"),
@@ -119,9 +121,11 @@
                         }
                     }
                 });
+                this.popup.$element.on('close', $.proxy(this.deactivate, this));
             }else{
                 this.popup.open("");
             }
+
             (this.options.type === 'line') ?
                     $("#linerulerButton").parent().addClass("toolBarItemActive") :
                     $("#arearulerButton").parent().addClass("toolBarItemActive");
@@ -175,7 +179,7 @@
                 this.segments.empty();
             }
             this.total.html('<b>'+measure+'</b>');
-            
+
         },
         _getMeasureFromEvent: function(event){
             var measure = event.measure,
@@ -212,4 +216,3 @@
     });
 
 })(jQuery);
-

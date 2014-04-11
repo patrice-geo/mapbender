@@ -114,8 +114,8 @@ abstract class WmsCapabilitiesParser
             throw new NotSupportedVersionException("No supported CapabilitiesDocument");
         }
 
-        if ($validate && !@$this->doc->validate()) {
-            // TODO logging
+        if ($validate && !@$doc->validate()) {
+            throw new XmlParseException("A WMS document is not valid");
         }
 
         $version = $doc->documentElement->getAttribute("version");

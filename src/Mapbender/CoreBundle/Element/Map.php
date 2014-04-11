@@ -69,7 +69,7 @@ class Map extends Element
     /**
      * @inheritdoc
      */
-    public function getAssets()
+    static public function listAssets()
     {
         return array(
             'js' => array(
@@ -78,7 +78,7 @@ class Map extends Element
                 'mapquery/src/jquery.mapquery.core.js',
                 'proj4js/proj4js-compressed.js',
                 'mapbender.element.map.js'),
-            'css' => array());
+            'css' => array('@MapbenderCoreBundle/Resources/public/sass/element/map.scss'));
     }
 
     /**
@@ -145,7 +145,14 @@ class Map extends Element
         $configuration["srsDefs"] = $this->getSrsDefinitions($allsrs);
         $srs_req = $this->container->get('request')->get('srs');
         if ($srs_req) {
-            if (!isset($allsrs[$srs])) {
+            $exists = false;
+            foreach ($allsrs as $srsItem) {
+                if(strtoupper($srsItem['name']) === strtoupper($srs_req)){
+                    $exists = true;
+                    break;
+                }
+            }
+            if (!$exists) {
                 throw new \RuntimeException('The srs: "' . $srs_req
                 . '" does not supported.');
             }

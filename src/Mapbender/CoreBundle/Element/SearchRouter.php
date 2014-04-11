@@ -57,10 +57,11 @@ class SearchRouter extends Element
     /**
      * @inheritdoc
      */
-    public function getAssets()
+    static public function listAssets()
     {
         return array(
             'js' => array(
+                '@MapbenderCoreBundle/Resources/public/mapquery/lib/openlayers/OpenLayers.js',
                 '@FOMCoreBundle/Resources/public/js/widgets/popup.js',
                 '@FOMCoreBundle/Resources/public/js/widgets/dropdown.js',
                 'vendor/underscore.js',
@@ -69,6 +70,7 @@ class SearchRouter extends Element
                 'mapbender.element.searchRouter.Feature.js',
                 'mapbender.element.searchRouter.Search.js',
                 'mapbender.element.searchRouter.js'),
+            'css' => array('@MapbenderCoreBundle/Resources/public/sass/element/search_router.scss'),
             'trans' => array('MapbenderCoreBundle:Element:search_router.json.twig'));
     }
 

@@ -3,7 +3,9 @@
     $.widget("mapbender.mbWmsloader", {
         options: {
             autoOpen: false,
-            title: Mapbender.trans('mb.wms.wmsloader.title')
+            title: Mapbender.trans('mb.wms.wmsloader.title'),
+            splitLayers: false,
+            wms_url: null
         },
         elementUrl: null,
         _create: function(){
@@ -22,6 +24,19 @@
             }else{
                 Mapbender['declarative'] = {'source.add.wms': $.proxy(this.loadDeclarativeWms, this)};
             }
+            if(this.options.wms_url && this.options.wms_url !== ''){
+                var options = {
+                    'gcurl': this.options.wms_url,
+                    'type': 'url',
+                    'layers': {},
+                    'global': {
+                        'mergeSource': false,
+                        'splitLayers': this.options.splitLayers,
+                        'options': {'treeOptions': {'selected': true}}
+                    }
+                };
+                this.loadWms(options);
+            }
             this._trigger('ready');
             this._ready();
         },
@@ -39,7 +54,7 @@
                     modal: false,
                     closeButton: false,
                     closeOnESC: false,
-                    closeOnPopupCloseClick: false,
+                    closeOnPopupCloseClick: true,
                     content: self.element,
                     destroyOnClose: true,
                     width: 500,
@@ -77,6 +92,7 @@
                         }
                     }
                 });
+                this.popup.$element.on('close', $.proxy(this.close, this));
             }else{
                 this.popup.open();
             }
@@ -206,7 +222,7 @@
                 }
             });
         },
-        
+
         _addSources: function(sourceDefs, sourceOpts){
             var self = this;
             var mbMap = $('#' + self.options.target).data('mapbenderMbMap');

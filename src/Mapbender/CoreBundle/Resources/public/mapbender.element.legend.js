@@ -343,15 +343,17 @@
                     this.popup = new Mapbender.Popup2({
                         title: self.element.attr('title'),
                         draggable: true,
+                        resizable: true,
                         modal: false,
                         closeButton: false,
-                        closeOnPopupCloseClick: false,
+                        closeOnPopupCloseClick: true,
                         closeOnESC: false,
                         content: ('<ul>' + html + '</ul>'),
                         width: 350,
+                        height: 500,
                         buttons: {
                             'ok': {
-                                label: 'Close',
+                                label: Mapbender.trans('mb.core.legend.popup.btn.ok'),
                                 cssClass: 'button right',
                                 callback: function(){
                                     self.close();
