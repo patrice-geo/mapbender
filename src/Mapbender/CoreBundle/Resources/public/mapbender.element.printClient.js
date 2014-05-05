@@ -495,6 +495,7 @@
                 var geometries = [];
                 for(var idx = 0; idx < layer.features.length; idx++) {
                     var feature = layer.features[idx];
+                    if (!feature.onScreen(true)) continue
                     var geometry = geojsonFormat.extract.geometry.apply(geojsonFormat, [feature.geometry]);
                     geometry.style = layer.styleMap.createSymbolizer(feature);
                     geometries.push(geometry);
