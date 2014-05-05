@@ -33,7 +33,14 @@
 
         _setup: function(){
             this.map = $('#' + this.options.target).data('mapbenderMbMap');
-
+            
+            $('input[name="scale_text"],select[name="scale_select"], input[name="rotation"]', this.element)
+                .on('change', $.proxy(this._updateGeometry, this));
+            $('input[name="scale_text"], input[name="rotation"]', this.element)
+                .on('keyup', $.proxy(this._updateGeometry, this));
+            $('select[name="template"]', this.element)
+                .on('change', $.proxy(this._getPrintSize, this));
+            
             this._trigger('ready');
             this._ready();
         },
@@ -82,19 +89,9 @@
                     this.popup.open(self.element);
                  }
             }
-
-
             me.show();
-
-            $('input[name="scale_text"],select[name="scale_select"], input[name="rotation"]', this.element)
-            .bind('change', $.proxy(this._updateGeometry, this));
-            $('input[name="scale_text"], input[name="rotation"]', this.element)
-            .bind('keyup', $.proxy(this._updateGeometry, this));
-            $('select[name="template"]', this.element)
-            .bind('change', $.proxy(this._getPrintSize, this))
-            .trigger('change');
-
             this.popupIsOpen = true;
+            this._getPrintSize();
             this._loadPrintFormats();
             this._updateElements();
             this._updateGeometry(true);
@@ -244,8 +241,8 @@
                 height = this.height,
                 scale = this._getPrintScale(),
                 rotationField = $('input[name="rotation"]');
-
-            if (rotationField.val() === '' && this.rotateValue !== '0'){
+                
+            if (rotationField.val() === '' && this.rotateValue > '0'){
                 rotationField.val('0');
             }
             var rotation = $('input[name="rotation"]').val();
@@ -587,7 +584,7 @@
 
         _getPrintSize: function() {
             var self = this;
-            var template = $('select[name="template"]', this.element).val();
+            var template = $('select[name="template"]', this.element).val(),
             data = {
                 template: template
             };

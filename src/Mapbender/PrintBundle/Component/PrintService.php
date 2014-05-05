@@ -201,13 +201,36 @@ class PrintService
                     $im = imagecreatefromgif($imagename);
                     break;
                 default:
-                    continue;
                     $this->container->get("logger")->debug("Unknown mimetype " . trim($response->headers->get('content-type')));
+                    continue;
             }
 
             if ($im !== null) {
                     imagealphablending($im, false);
                     imagesavealpha($im, true);
+
+                    // Taking the painful way to alpha blending. Stupid PHP-GD
+                    $opacity = floatVal($this->data['layers'][$k]['opacity']);
+                    if(1.0 !== $opacity) {
+                        $width = imagesx($im);
+                        $height = imagesy($im);
+                        for ($x = 0; $x < $width; $x++) {
+                            for ($y = 0; $y < $height; $y++) {
+                                $colorIn = imagecolorsforindex($im, imagecolorat($im, $x, $y));
+                                $alphaOut = 127 - (127 - $colorIn['alpha']) * $opacity;
+
+                                $colorOut = imagecolorallocatealpha(
+                                    $im,
+                                    $colorIn['red'],
+                                    $colorIn['green'],
+                                    $colorIn['blue'],
+                                    $alphaOut);
+                                imagesetpixel($im, $x, $y, $colorOut);
+                                imagecolordeallocate($im, $colorOut);
+                            }
+                        }
+                    }
+
                     imagepng($im, $imagename);
             }
         }
@@ -224,13 +247,7 @@ class PrintService
             if (is_file($temp_name) && finfo_file($finfo, $temp_name) == 'image/png') {
                 $dest = $finalImage;
                 $src = imagecreatefrompng($temp_name);
-                if ($this->layerOpacity[$k] !== 100){
-                    ImageCopyMerge($dest, $src, 0, 0, 0, 0, $this->image_width,
-                       $this->image_height, $this->layerOpacity[$k]);
-                }else{
-                    imagecopy($dest, $src, 0, 0, 0, 0, $this->image_width,
-                        $this->image_height);
-                }
+                imagecopy($dest, $src, 0, 0, 0, 0, $this->image_width, $this->image_height);
                 imagepng($dest, $finalimagename);
                 unlink($temp_name);
             }
@@ -473,13 +490,13 @@ class PrintService
 
         // add overview map
         if (isset($this->data['overview']) && isset($this->conf['overview']) ) {
-            //$this->getOverviewMap();
+            $this->getOverviewMap();
         }
 
         unlink($this->finalimagename);
 
         if (null != $this->data['file_prefix']) {
-            $pdf->Output($this->data['file_prefix'] . '.pdf', 'I'); //file output
+            $pdf->Output($this->data['file_prefix'] . '.pdf', 'D'); //file output
         } else {
             $pdf->Output();
         }
@@ -613,11 +630,11 @@ class PrintService
             }
             unlink($temp_name);
             finfo_close($finfo);
-        }
-
-        $image = imagecreatefrompng($finalimagename);
-
-        // ohne rotation
+        }       
+        
+        $image = imagecreatefrompng($finalimagename);             
+        
+        // ohne rotation      
         if ($this->data['rotation'] == 0) {
 
             $map_width = $this->data['extent']['width'];
