@@ -30,7 +30,10 @@ class PrintService
     {
         $this->data = json_decode($content, true);
         $template = $this->data['template'];
-
+//        print "<pre>";
+//        print_r($this->data);
+//        print "</pre>";
+//        die();
         $this->getTemplateConf($template);
         $this->createUrlArray();
         $this->addReplacePattern();
@@ -493,7 +496,13 @@ class PrintService
         if (isset($this->data['overview']) && isset($this->conf['overview']) ) {
             $this->getOverviewMap();
         }
-
+        
+        // add scalebar
+        
+        if (isset($this->conf['scalebar']) ) {
+            $this->getScaleBar();
+        }
+        
         unlink($this->finalimagename);
 
         if (null != $this->data['file_prefix']) {
@@ -705,6 +714,38 @@ class PrintService
 
         unlink($finalimagename);
     }
+    
+    
+    private function getScaleBar(){
+        // temp scale bar
+        
+        $pdf = $this->pdf;
+        // Linienbreite einstellen, 0.5 mm
+        $pdf->SetLineWidth(0.1);
+        // Rahmenfarbe 
+        $pdf->SetDrawColor(0, 0, 0);
+        // Füllung 
+        $pdf->SetFillColor(0,0,0);
+        // Schriftart definieren
+        $pdf->SetFont('arial', '', 10 );
+        
+        $length = 0.01 * $this->data['scale_select'] * 5;
+        $suffix = 'm';
+        
+        $pdf->Text( $this->conf['scalebar']['x'] * 10 -1 , $this->conf['scalebar']['y'] * 10 - 1 , '0' );
+        $pdf->Text( $this->conf['scalebar']['x'] * 10 + 46, $this->conf['scalebar']['y'] * 10 - 1 , $length . ' ' . $suffix);
+        
+        $pdf->Rect($this->conf['scalebar']['x'] * 10 , $this->conf['scalebar']['y'] * 10, 10, 2, 'FD');
+        $pdf->SetFillColor(255, 255, 255);
+        $pdf->Rect($this->conf['scalebar']['x'] * 10 + 10 , $this->conf['scalebar']['y'] * 10, 10, 2, 'FD');
+        $pdf->SetFillColor(0,0,0);
+        $pdf->Rect($this->conf['scalebar']['x'] * 10 + 20  , $this->conf['scalebar']['y'] * 10, 10, 2, 'FD');
+        $pdf->SetFillColor(255, 255, 255);
+        $pdf->Rect($this->conf['scalebar']['x'] * 10 + 30 , $this->conf['scalebar']['y'] * 10, 10, 2, 'FD');
+        $pdf->SetFillColor(0,0,0);
+        $pdf->Rect($this->conf['scalebar']['x'] * 10 + 40  , $this->conf['scalebar']['y'] * 10, 10, 2, 'FD');
+    }
+
 
     private function getColor($color, $alpha, $image)
     {
