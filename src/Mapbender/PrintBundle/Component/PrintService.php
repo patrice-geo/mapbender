@@ -4,9 +4,8 @@ namespace Mapbender\PrintBundle\Component;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use FPDF_FPDF;
-use FPDF_FPDI;
-use Mapbender\PrintBundle\Component\PDF_ImageAlpha;
+use TCPDF_FONTS;
+use TCPDF_IMPORT as TCPDF;
 
 /**
  * The print service.
@@ -395,7 +394,6 @@ class PrintService
      */
     private function buildPdf()
     {
-        require('PDF_ImageAlpha.php');
         $tempdir = $this->tempdir;
         $resource_dir = $this->container->getParameter('kernel.root_dir') . '/Resources/MapbenderPrintBundle';
         $format = $this->data['format'];
@@ -412,20 +410,22 @@ class PrintService
             $format = array(841, 1189);
         }
 
-        $this->pdf = new PDF_ImageAlpha($this->orientation, 'mm', $format);
-        //$this->pdf = new FPDF_FPDI($this->orientation,'mm',$format);
+        $this->pdf = new TCPDF($this->orientation, 'mm', $format, true, 'UTF-8', false);
         $pdf = $this->pdf;
         $template = $this->data['template'];
         $pdffile = $resource_dir . '/templates/' . $template . '.pdf';
-        $pagecount = $pdf->setSourceFile($pdffile);
-        $tplidx = $pdf->importPage(1);
+
+        // There's a stray print_r in the importPDF method, so we silence the method by hand        
+        ob_start();
+        $pdf->importPDF($pdffile);
+        ob_end_clean();
+
 
         $pdf->SetAutoPageBreak(false);
         $pdf->addPage();
-        $pdf->useTemplate($tplidx);
 
         foreach ($this->conf['fields'] as $k => $v) {
-            $pdf->SetFont('Arial', '', $this->conf['fields'][$k]['fontsize']);
+            $pdf->SetFont('Dejavu Sans', '', $this->conf['fields'][$k]['fontsize'], TCPDF_FONTS::_getfontpath() . 'dejavusans.php');
             $pdf->SetXY($this->conf['fields'][$k]['x'] * 10,
                 $this->conf['fields'][$k]['y'] * 10);
             switch ($k) {
