@@ -4,7 +4,8 @@ namespace Mapbender\PrintBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Response;
-use Mapbender\PrintBundle\Component\PrintService;
+//use Mapbender\PrintBundle\Component\PrintService;
+use Mapbender\PrintBundle\Component\PrintService2 as PrintService;
 use Mapbender\PrintBundle\Component\ImageExportService;
 
 class PrintController extends Controller
