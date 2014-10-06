@@ -64,7 +64,7 @@ class WMSLayerType  extends AbstractType {
         ));
 
     }
-    public function getDefaultOptions(){
+    public function getDefaultOptions(array $array= array()){
         return array(
             'data_class' => "Mapbender\WmsBundle\Entity\WMSLayer"
         );

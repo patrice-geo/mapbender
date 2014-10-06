@@ -13,7 +13,7 @@ class ApplicationType extends AbstractType {
     }
 
     // TODO: Switch to setDefaultOptions (before Symfony 2.3)
-    public function getDefaultOptions() {
+    public function getDefaultOptions(array $array= array()){
         return array(
             'available_templates' => array());
     }

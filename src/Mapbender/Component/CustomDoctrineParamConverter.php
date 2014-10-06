@@ -102,7 +102,7 @@ class CustomDoctrineParamConverter implements ParamConverterInterface {
         }
 
     }
-
+    
     public function supports(ConfigurationInterface $configuration) {
         if (null === $this->registry) {
             return false;
