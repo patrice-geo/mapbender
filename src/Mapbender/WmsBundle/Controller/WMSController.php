@@ -45,7 +45,7 @@ class WMSController extends Controller
         }
 
         $wmsList = $this->getDoctrine()->getRepository("Mapbender\WmsBundle\Entity\WMSService")
-            ->findBy($criteria, array('title' => 'ASC'), $limit + 1, $offset);
+            ->findBy($criteria, array('title' => 'ASC'), $limit, $offset);
         
         $total = $this->getDoctrine()
             ->getEntityManager()
@@ -55,7 +55,7 @@ class WMSController extends Controller
         $total = $total[0]['total'];
         $nextOffset = count($wmsList) < $limit ? $offset : $offset + $limit;
         $prevOffset = ($offset - $limit) > 0 ? $offset - $limit : 0;
-        $lastOffset = ($total - $limit) > 0 ? $total - $limit : 0;
+        $lastOffset = ($total - $limit) > 0 ? floor($total / $limit) * $limit : 0;
 
         $dispatcher = $this->get("event_dispatcher");
 
