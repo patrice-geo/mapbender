@@ -687,7 +687,8 @@
                         closeButton: false,
                         closeOnESC: false,
                         content: [self.element.show()],
-                        destroyOnClose: true,
+                        destroyOnClose: false,
+                        detachOnClose: false,
                         width: 350,
                         height: 500,
                         cssClass: 'customLayertree',
@@ -702,9 +703,7 @@
                         }
                     });
                     this._reset();
-                    this.popup.$element.on('close', $.proxy(this.close, this));
                 } else {
-                    this._reset();
                     this.popup.open();
                 }
             }
@@ -714,16 +713,7 @@
          */
         close: function() {
             if (this.options.type === 'dialog') {
-                if (this.popup) {
-                    $("ul.layers:first", this.element).empty();
-                    $(this.element).hide().appendTo("body");
-                    this._unSortable();
-                    this.created = false;
-                    if (this.popup.$element) {
-                        this.popup.destroy();
-                    }
-                    this.popup = null;
-                }
+                this.popup.close();
             }
             this.callback ? this.callback.call() : this.callback = null;
         },
