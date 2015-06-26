@@ -69,7 +69,7 @@ class Regional extends Template
     public static function getElementWhitelist()
     {
         return array('toolbar'       => array('Mapbender\CoreBundle\Element\Button',
-                                              'Mapbender\CoreBundle\Element\AboutDialog'),
+                                              'Mapbender\AboutBundle\Element\AboutDialog'),
                      'content'       => array('Mapbender\CoreBundle\Element\ActivityIndicator',
                                               'Mapbender\CoreBundle\Element\CoordinatesDisplay',
                                               'Mapbender\CoreBundle\Element\Copyright',
@@ -86,7 +86,7 @@ class Regional extends Template
                                               'Mapbender\CoreBundle\Element\Sketch',
                                               'Mapbender\CoreBundle\Element\SrsSelector',
                                               'Mapbender\CoreBundle\Element\ZoomBar'),
-                     'infocontainer' => array('Mapbender\CoreBundle\Element\AboutDialog',
+                     'infocontainer' => array('Mapbender\AboutBundle\Element\AboutDialog',
                                               'Mapbender\CoreBundle\Element\BaseSourceSwitcher',
                                               'Mapbender\CoreBundle\Element\CoordinatesDisplay',
                                               'Mapbender\CoreBundle\Element\Copyright',
