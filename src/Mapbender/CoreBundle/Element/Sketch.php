@@ -5,7 +5,7 @@ use Mapbender\CoreBundle\Component\Element;
 
 /**
  * Sketch Element
- * 
+ *
  * @author Paul Schmidt
  */
 class Sketch extends Element
@@ -114,7 +114,7 @@ class Sketch extends Element
 
     protected function getForm()
     {
-        
+
         $html = $this->container->get('templating')
             ->render('MapbenderCoreBundle:Form:sketch-form.html.twig',
             array(
@@ -126,9 +126,9 @@ class Sketch extends Element
 
     protected function saveForm()
     {
-        $request = $this->container->get('request');
+        $request = $this->container->get('request_stack')->getCurrentRequest();
         // TODO save form
-        // 
+        //
         // if ok
         return new Response(json_encode(array("success" => MyContent)), 200,
             array('Content-Type' => 'application/json'));

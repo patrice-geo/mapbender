@@ -35,7 +35,7 @@ class ElementController extends Controller
     {
         $application = $this->get('mapbender')->getApplicationEntity($slug);
         $template    = $application->getTemplate();
-        $region      = $this->get('request')->get('region');
+        $region      = $this->getRequest()->get('region');
         $whitelist   = null;
         $classNames  = null;
 
@@ -106,7 +106,7 @@ class ElementController extends Controller
         // Get first region (by default)
         $template = $application->getTemplate();
         $regions = $template::getRegions();
-        $region = $this->get('request')->get('region');
+        $region = $this->getRequest()->get('region');
 
         $appl = new \Mapbender\CoreBundle\Component\Application($this->container,
             $application, array());
@@ -134,13 +134,13 @@ class ElementController extends Controller
     {
         $application = $this->get('mapbender')->getApplicationEntity($slug);
 
-        $data = $this->get('request')->get('form');
+        $data = $this->getRequest()->get('form');
         $element = ComponentElement::getDefaultElement($data['class'],
                 $data['region']);
         $element->setApplication($application);
         $form = ComponentElement::getElementForm($this->container, $application,
                 $element);
-        $form['form']->bind($this->get('request'));
+        $form['form']->bind($this->getRequest());
 
         if ($form['form']->isValid()) {
             $em = $this->getDoctrine()->getManager();
@@ -221,7 +221,7 @@ class ElementController extends Controller
         $form = ComponentElement::getElementForm($this->container, $application,
                 $element);
 //        $form = $this->getElementForm($application, $element);
-        $form['form']->bind($this->get('request'));
+        $form['form']->bind($this->getRequest());
 
         if ($form['form']->isValid()) {
             $em = $this->getDoctrine()->getManager();
@@ -399,8 +399,8 @@ class ElementController extends Controller
             throw $this->createNotFoundException('The element with the id "'
                 . $id . '" does not exist.');
         }
-        $number = $this->get("request")->get("number");
-        $newregion = $this->get("request")->get("region");
+        $number = $this->getRequest()->get("number");
+        $newregion = $this->getRequest()->get("region");
         if (intval($number) === $element->getWeight() && $element->getRegion() ===
             $newregion) {
             return new Response(json_encode(array(
@@ -513,7 +513,7 @@ class ElementController extends Controller
             ->getRepository('MapbenderCoreBundle:Element')
             ->findOneById($id);
 
-        $enabled = $this->get("request")->get("enabled");
+        $enabled = $this->getRequest()->get("enabled");
         if (!$element) {
             return new Response(json_encode(array(
                     'error' => 'An element with the id "' . $id . '" does not exist.')),

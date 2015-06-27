@@ -98,7 +98,7 @@ class RepositoryController extends Controller
         $manager = $managers[$managertype];
 
         $path = array('_controller' => $manager['bundle'] . ":" . "Repository:create");
-        $subRequest = $this->container->get('request')->duplicate(array(), null, $path);
+        $subRequest = $this->container->get('request_stack')->getCurrentRequest()->duplicate(array(), null, $path);
         return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 
@@ -117,7 +117,7 @@ class RepositoryController extends Controller
             '_controller' => $manager['bundle'] . ":" . "Repository:view",
             "id" => $source->getId()
         );
-        $subRequest = $this->container->get('request')->duplicate(array(), null, $path);
+        $subRequest = $this->container->get('request_stack')->getCurrentRequest()->duplicate(array(), null, $path);
         return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 
@@ -167,7 +167,7 @@ class RepositoryController extends Controller
             '_controller' => $manager['bundle'] . ":" . "Repository:delete",
             "sourceId" => $source->getId()
         );
-        $subRequest = $this->container->get('request')->duplicate(array(), null, $path);
+        $subRequest = $this->container->get('request_stack')->getCurrentRequest()->duplicate(array(), null, $path);
         return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 
@@ -216,7 +216,7 @@ class RepositoryController extends Controller
             '_controller' => $manager['bundle'] . ":" . "Repository:update",
             "sourceId" => $source->getId()
         );
-        $subRequest = $this->container->get('request')->duplicate(array(), null, $path);
+        $subRequest = $this->container->get('request_stack')->getCurrentRequest()->duplicate(array(), null, $path);
         return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 
@@ -249,7 +249,7 @@ class RepositoryController extends Controller
             "slug" => $slug,
             "instanceId" => $sourceInst->getId()
         );
-        $subRequest = $this->container->get('request')->duplicate(array(), null, $path);
+        $subRequest = $this->container->get('request_stack')->getCurrentRequest()->duplicate(array(), null, $path);
         return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 
@@ -259,8 +259,9 @@ class RepositoryController extends Controller
      */
     public function instanceWeightAction($slug, $layersetId, $instanceId)
     {
-        $number = $this->get("request")->get("number");
-        $layersetId_new = $this->get("request")->get("new_layersetId");
+        $req = $this->get("request_stack")->getCurrentRequest();
+        $number = $req->get("number");
+        $layersetId_new = $req->get("new_layersetId");
 
         $instance = $this->getDoctrine()
             ->getRepository('MapbenderCoreBundle:SourceInstance')
@@ -388,7 +389,7 @@ class RepositoryController extends Controller
             "layersetId" => $layersetId,
             "instanceId" => $sourceInst->getId()
         );
-        $subRequest = $this->container->get('request')->duplicate(array(), null, $path);
+        $subRequest = $this->container->get('request_stack')->getCurrentRequest()->duplicate(array(), null, $path);
         return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 
@@ -410,7 +411,7 @@ class RepositoryController extends Controller
             "instanceId" => $sourceInst->getId(),
             "instLayerId" => $instLayerId
         );
-        $subRequest = $this->container->get('request')->duplicate(array(), null, $path);
+        $subRequest = $this->container->get('request_stack')->getCurrentRequest()->duplicate(array(), null, $path);
         return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 }

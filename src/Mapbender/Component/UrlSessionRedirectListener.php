@@ -8,7 +8,7 @@ class UrlSessionRedirectListener {
     private $request;
 
     public function __construct($container) {
-        $this->request = $container->get('request');
+        $this->request = $container->get('request_stack')->getCurrentRequest();
     }
 
     public function onKernelResponse(FilterResponseEvent $event) {

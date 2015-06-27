@@ -129,7 +129,7 @@ class Map extends Element
         }
         $allsrs = array_unique($allsrs, SORT_REGULAR);
         $configuration["srsDefs"] = $this->getSrsDefinitions($allsrs);
-        $srs_req                  = $this->container->get('request')->get('srs');
+        $srs_req                  = $this->container->get('request_stack')->getCurrentRequest()->get('srs');
         if ($srs_req) {
             $exists = false;
             foreach ($allsrs as $srsItem) {
@@ -145,7 +145,7 @@ class Map extends Element
             }
         }
 
-        $pois = $this->container->get('request')->get('poi');
+        $pois = $this->container->get('request_stack')->getCurrentRequest()->get('poi');
         if ($pois) {
             $extra['pois'] = array();
             if (array_key_exists('point', $pois)) {
@@ -162,7 +162,7 @@ class Map extends Element
             }
         }
 
-        $bbox = $this->container->get('request')->get('bbox');
+        $bbox = $this->container->get('request_stack')->getCurrentRequest()->get('bbox');
         if (!isset($extra['pois']) && $bbox) {
             $bbox = explode(',', $bbox);
             if (count($bbox) === 4) {
@@ -175,7 +175,7 @@ class Map extends Element
             }
         }
 
-        $center    = $this->container->get('request')->get('center');
+        $center    = $this->container->get('request_stack')->getCurrentRequest()->get('center');
         $centerArr = $center !== null ? explode(',', $center) : null;
         if ($center !== null && is_array($centerArr) && count($centerArr) === 2) {
             $configuration["center"] = $centerArr;
@@ -185,7 +185,7 @@ class Map extends Element
         if (!isset($configuration['layersets']) && isset($configuration['layerset'])) {# "layerset" deprecated start
             $configuration['layersets'] = array($configuration['layerset']);
         }# "layerset" deprecated end
-        if ($scale = $this->container->get('request')->get('scale')) {
+        if ($scale = $this->container->get('request_stack')->getCurrentRequest()->get('scale')) {
             $scale  = intval($scale);
             $scales = $configuration['scales'];
             if ($scale > $scales[0]) {
@@ -258,7 +258,7 @@ class Map extends Element
      */
     protected function loadSrsDefinitions()
     {
-        $srsList = $this->container->get('request')->get("srs", null);
+        $srsList = $this->container->get('request_stack')->getCurrentRequest()->get("srs", null);
         $srses   = preg_split("/\s?,\s?/", $srsList);
         $allsrs  = array();
         foreach ($srses as $srs) {

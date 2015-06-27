@@ -94,7 +94,7 @@ class SuggestMap extends Element
     public function getConfiguration()
     {
         $configuration = parent::getConfiguration();
-        $stateid = $this->container->get('request')->get('stateid');
+        $stateid = $this->container->get('request_stack')->getCurrentRequest()->get('stateid');
         if ($stateid) {
             $configuration["load"] = array('stateid' => $stateid);
         }
@@ -129,7 +129,7 @@ class SuggestMap extends Element
         }
         switch ($action) {
             case 'load':
-                $id = $this->container->get('request')->get("_id", null);
+                $id = $this->container->get('request_stack')->getCurrentMap()->get("_id", null);
                 return $this->loadState($id);
                 break;
             case 'state':
@@ -184,7 +184,7 @@ class SuggestMap extends Element
     protected function saveState()
     {
         $wmchandler = new WmcHandler($this, $this->application, $this->container);
-        $json = $this->container->get('request')->get("state", null);
+        $json = $this->container->get('request_stack')->getCurrentMap()->get("state", null);
         $state = $wmchandler->saveState($json);
         if ($state !== null) {
             return new Response(json_encode(array(

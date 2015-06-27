@@ -113,7 +113,7 @@ class SimpleSearch extends Element
     public function httpAction($action) {
         $configuration = $this->getConfiguration();
 
-        $q = $this->container->get('request')->get('term', '');
+        $q = $this->container->get('request_stack')->getCurrentRequest()->get('term', '');
         $qf = $configuration['query_format'] ? $configuration['query_format'] : '%s';
 
         // Replace Whitespace if desired
@@ -133,7 +133,7 @@ class SimpleSearch extends Element
             '_controller' => 'OwsProxy3CoreBundle:OwsProxy:genericProxy',
             'url' => $url
         );
-        $subRequest = $this->container->get('request')->duplicate(array(), null, $path);
+        $subRequest = $this->container->get('request_stack')->getCurrentRequest()->duplicate(array(), null, $path);
         $response = $this->container->get('http_kernel')->handle(
                 $subRequest, HttpKernelInterface::SUB_REQUEST);
         // Dive into result JSON if needed (Solr for example 'response.docs')

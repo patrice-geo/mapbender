@@ -509,7 +509,7 @@ class ApplicationController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $requestedState = $this->get('request')->get('state');
+        $requestedState = $this->getRequest()->get('state');
         $currentState   = $application->isPublished();
         $newState       = $currentState;
 
@@ -672,7 +672,7 @@ class ApplicationController extends Controller
                 ->find($layersetId);
             $form     = $this->createForm(new LayersetType(), $layerset);
         }
-        $form->bind($this->get('request'));
+        $form->bind($this->getRequest());
         if ($form->isValid()) {
             $this->getDoctrine()->getManager()->persist($layerset);
             $this->getDoctrine()->getManager()->flush();
@@ -829,7 +829,7 @@ class ApplicationController extends Controller
             "slug" => $slug,
             "instanceId" => $instanceId
         );
-        $subRequest = $this->container->get('request')->duplicate(array(), null, $path);
+        $subRequest = $this->container->getRequest()->duplicate(array(), null, $path);
         return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 

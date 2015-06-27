@@ -81,7 +81,7 @@ class SearchRouter extends Element
     {
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
-        $request = $this->container->get('request');
+        $request = $this->container->get('request_stack')->getCurrentRequest();
 
         list($target, $action) = explode('/', $action);
         $conf = $this->getConfiguration();

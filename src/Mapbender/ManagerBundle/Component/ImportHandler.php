@@ -50,7 +50,7 @@ class ImportHandler extends ExchangeHandler
     public function bindForm()
     {
         $form    = $this->createForm();
-        $request = $this->container->get('request');
+        $request = $this->container->get('request_stack')->getCurrentRequest();
         $form->bind($request);
         if ($form->isValid()) {
             return true;
@@ -225,7 +225,7 @@ class ImportHandler extends ExchangeHandler
             }
         }
     }
-    
+
     private function mergeIntoMapper(array $mapper)
     {
         foreach ($mapper as $class => $content) {

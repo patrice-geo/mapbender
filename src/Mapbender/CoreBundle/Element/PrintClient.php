@@ -177,7 +177,7 @@ class PrintClient extends Element
      */
     public function httpAction($action)
     {
-        $request = $this->container->get('request');
+        $request = $this->container->get('request_stack')->getCurrentRequest();
         $configuration = $this->getConfiguration();
         switch ($action) {
             case 'print':
