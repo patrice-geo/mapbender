@@ -78,11 +78,6 @@ abstract class ExchangeHandler
         return $allowed_sources;
     }
 
-    public function getSecurityContext()
-    {
-        return $this->securityContext;
-    }
-
     public function getContainer()
     {
         return $this->container;
