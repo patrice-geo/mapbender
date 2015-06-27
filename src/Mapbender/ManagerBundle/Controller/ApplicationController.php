@@ -100,15 +100,15 @@ class ApplicationController extends Controller
      * @ManagerRoute("/application/export")
      * @Template
      */
-    public function exportAction()
+    public function exportAction(Request $request)
     {
         $expHandler = new ExportHandler($this->container);
-        if ($this->getRequest()->getMethod() === 'GET') {
+        if ($request->getMethod() === 'GET') {
             $form = $expHandler->createForm();
             return array(
                 'form' => $form->createView()
             );
-        } elseif ($this->getRequest()->getMethod() === 'POST') {
+        } elseif ($request->getMethod() === 'POST') {
             if ($expHandler->bindForm()) {
                 $job    = $expHandler->getJob();
                 $export = $expHandler->format($expHandler->makeJob());
@@ -147,15 +147,15 @@ class ApplicationController extends Controller
      * @ManagerRoute("/application/import")
      * @Template
      */
-    public function importAction()
+    public function importAction(Request $request)
     {
         $impHandler = new ImportHandler($this->container, false);
-        if ($this->getRequest()->getMethod() === 'GET') {
+        if ($request->getMethod() === 'GET') {
             $form = $impHandler->createForm();
             return array(
                 'form' => $form->createView()
             );
-        } elseif ($this->getRequest()->getMethod() === 'POST') {
+        } elseif ($request->getMethod() === 'POST') {
             if ($impHandler->bindForm()) {
                 $job     = $impHandler->getJob();
                 $scFile  = $job->getImportFile();
@@ -218,7 +218,7 @@ class ApplicationController extends Controller
      * @Method("POST")
      * @Template("MapbenderManagerBundle:Application:new.html.twig")
      */
-    public function createAction()
+    public function createAction($request)
     {
         $application      = new Application();
         $uploadScreenshot = new UploadScreenshot();
@@ -226,7 +226,6 @@ class ApplicationController extends Controller
         $this->checkGranted('CREATE', $application);
 
         $form       = $this->createApplicationForm($application);
-        $request    = $this->getRequest();
         $parameters = $request->request->get('application');
 
         $screenshot_url = null;
@@ -349,7 +348,7 @@ class ApplicationController extends Controller
      * @ManagerRoute("/application/{slug}/update", requirements = { "slug" = "[\w-]+" })
      * @Method("POST")
      */
-    public function updateAction($slug)
+    public function updateAction($slug, Request $request)
     {
         $uploadScreenshot = new UploadScreenshot();
         $application      = $this->get('mapbender')->getApplicationEntity($slug);
@@ -358,7 +357,6 @@ class ApplicationController extends Controller
         $this->checkGranted('EDIT', $application);
         $templateClassOld = $application->getTemplate();
         $form             = $this->createApplicationForm($application);
-        $request          = $this->getRequest();
         $parameters       = $request->request->get('application');
         $screenshot_url   = "";
         $app_web_url      = AppComponent::getAppWebUrl($this->container, $application->getSlug());
@@ -500,7 +498,7 @@ class ApplicationController extends Controller
      * @ManagerRoute("/application/{slug}/state", options={"expose"=true})
      * @Method("POST")
      */
-    public function toggleStateAction($slug)
+    public function toggleStateAction($slug, Request $request)
     {
         $application = $this->get('mapbender')->getApplicationEntity($slug);
 
@@ -509,7 +507,7 @@ class ApplicationController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $requestedState = $this->getRequest()->get('state');
+        $requestedState = $request->get('state');
         $currentState   = $application->isPublished();
         $newState       = $currentState;
 
@@ -658,7 +656,7 @@ class ApplicationController extends Controller
      * @Method("POST")
      * @Template("MapbenderManagerBundle:Application:form-layerset.html.twig")
      */
-    public function saveLayersetAction($slug, $layersetId = null)
+    public function saveLayersetAction($slug, $layersetId = null, Request $request)
     {
         $application = $this->get('mapbender')->getApplicationEntity($slug);
         $this->checkGranted('EDIT', $application);
@@ -672,7 +670,7 @@ class ApplicationController extends Controller
                 ->find($layersetId);
             $form     = $this->createForm(new LayersetType(), $layerset);
         }
-        $form->bind($this->getRequest());
+        $form->bind($request);
         if ($form->isValid()) {
             $this->getDoctrine()->getManager()->persist($layerset);
             $this->getDoctrine()->getManager()->flush();
@@ -812,7 +810,7 @@ class ApplicationController extends Controller
      * @Method("POST")
      *
      */
-    public function deleteInstanceAction($slug, $layersetId, $instanceId)
+    public function deleteInstanceAction($slug, $layersetId, $instanceId, Request $request)
     {
         $application = $this->get('mapbender')->getApplicationEntity($slug);
         // ACL access check
@@ -829,7 +827,7 @@ class ApplicationController extends Controller
             "slug" => $slug,
             "instanceId" => $instanceId
         );
-        $subRequest = $this->container->getRequest()->duplicate(array(), null, $path);
+        $subRequest = $request->duplicate(array(), null, $path);
         return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 

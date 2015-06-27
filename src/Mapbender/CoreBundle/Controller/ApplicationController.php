@@ -73,10 +73,9 @@ class ApplicationController extends Controller
      *
      * @Route("/application/{slug}/assets/css")
      */
-    public function ccssAction($slug)
+    public function ccssAction($slug, Request $request)
     {
         // Create virtual file system path required for url rewriting inside CSS files
-        $request = $this->getRequest();
         $route = $this->container->get('router')->getRouteCollection()->get($request->get('_route'));
         $targetPath = $request->server->get('SCRIPT_FILENAME') . $route->getPath();
 
@@ -111,7 +110,7 @@ class ApplicationController extends Controller
         $response->headers->set('Content-Type', 'text/css');
         $response->setLastModified($lastModified);
         $response->headers->set('X-Asset-Modification-Time', $lastModified->format('c'));
-        if ($response->isNotModified($this->get('request_stack')->getCurrentRequest())) {
+        if ($response->isNotModified($request)) {
             return $response;
         }
 
@@ -129,7 +128,7 @@ class ApplicationController extends Controller
      *
      * @Route("/application/{slug}/assets/{type}")
      */
-    public function assetsAction($slug, $type)
+    public function assetsAction($slug, $type, Request $request)
     {
         $response = new Response();
 
@@ -168,7 +167,6 @@ class ApplicationController extends Controller
             $source = str_replace(array('{slug}', '{type}'), array($slug, $type), $assets->getTargetPath());
 
             // Let's build the runtime target path
-            $request = $this->getRequest();
             $webDir = str_replace('\\', '/',
                                   realpath($this->container->get('kernel')->getRootDir() .
                     '/../web/'));
@@ -187,7 +185,7 @@ class ApplicationController extends Controller
         // Create HTTP 304 if possible
         $response->setLastModified($updateTime);
         $response->headers->set('X-Asset-Modification-Time', $asset_modification_time->format('c'));
-        if ($response->isNotModified($this->get('request_stack')->getCurrentRequest())) {
+        if ($response->isNotModified($request)) {
             return $response;
         }
 
@@ -308,10 +306,10 @@ class ApplicationController extends Controller
      *
      * @Route("/application/{slug}/metadata")
      */
-    public function metadataAction($slug)
+    public function metadataAction($slug, Request $request)
     {
         $securityContext = $this->get('security.authorization_checker');
-        $sourceId = $this->container->get('request_stack')->getCurrentRequest()->get("sourceId", null);
+        $sourceId = $request->get("sourceId", null);
         $instance = $this->container->get("doctrine")
                 ->getRepository('Mapbender\CoreBundle\Entity\SourceInstance')->find($sourceId);
         if (!$securityContext->isGranted('VIEW', new ObjectIdentity('class', 'Mapbender\CoreBundle\Entity\Application'))
@@ -328,7 +326,7 @@ class ApplicationController extends Controller
         $manager = $managers[$instance->getManagertype()];
 
         $path = array('_controller' => $manager['bundle'] . ":" . "Repository:metadata");
-        $subRequest = $this->container->get('request_stack')->getCurrentRequest()->duplicate(array(), null, $path);
+        $subRequest = $request->duplicate(array(), null, $path);
         return $this->container->get('http_kernel')->handle(
                 $subRequest, HttpKernelInterface::SUB_REQUEST);
     }
@@ -338,7 +336,7 @@ class ApplicationController extends Controller
      *
      * @Route("/application/{slug}/instance/{instanceId}/tunnel")
      */
-    public function instanceTunnelAction($slug, $instanceId)
+    public function instanceTunnelAction($slug, $instanceId, Request $request)
     {
         $instance = $this->container->get("doctrine")
                 ->getRepository('Mapbender\CoreBundle\Entity\SourceInstance')->find($instanceId);
@@ -356,8 +354,8 @@ class ApplicationController extends Controller
 //        $params = $this->getRequest()->getMethod() == 'POST' ?
 //            $this->get("request")->request->all() : $this->get("request")->query->all();
         $headers = array();
-        $postParams = $this->get('request_stack')->getCurrentRequest()->request->all();
-        $getParams = $this->get('request_stack')->getCurrentRequest()->query->all();
+        $postParams = $request->request->all();
+        $getParams = $request->query->all();
         $user = $instance->getSource()->getUsername() ? $instance->getSource()->getUsername() : null;
         $password = $instance->getSource()->getUsername() ? $instance->getSource()->getPassword() : null;
         $instHandler = EntityHandler::createHandler($this->container, $instance);

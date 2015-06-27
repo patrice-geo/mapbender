@@ -16,6 +16,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Permission\MaskBuilder;
@@ -76,9 +77,8 @@ class RepositoryController extends Controller
      * @Method({ "POST" })
      * @Template("MapbenderWmsBundle:Repository:new.html.twig")
      */
-    public function createAction()
+    public function createAction(Request $request)
     {
-        $request       = $this->getRequest();
         $wmssource_req = new WmsSource();
 
         $securityContext = $this->get('security.authorization_checker');
@@ -214,16 +214,15 @@ class RepositoryController extends Controller
      * @ManagerRoute("/{sourceId}/update")
      * @Template("MapbenderWmsBundle:Repository:updateform.html.twig")
      */
-    public function updateAction($sourceId)
+    public function updateAction($sourceId, Request $request)
     {
-        $request         = $this->getRequest();
         $source          = $this->getDoctrine()->getRepository("MapbenderCoreBundle:Source")->find($sourceId);
         $securityContext = $this->get('security.authorization_checker');
         $oid             = new ObjectIdentity('class', 'Mapbender\CoreBundle\Entity\Source');
         if (!$securityContext->isGranted('VIEW', $oid) && !$securityContext->isGranted('EDIT', $source)) {
             throw new AccessDeniedException();
         }
-        if ($this->getRequest()->getMethod() === 'POST') { // check form and redirect to update
+        if ($request->getMethod() === 'POST') { // check form and redirect to update
             $wmssource_req = new WmsSource();
             $form          = $this->get("form.factory")->create(new WmsSourceSimpleType(), $wmssource_req);
             $form->bind($request);
@@ -382,15 +381,15 @@ class RepositoryController extends Controller
      * @ManagerRoute("/instance/{slug}/{instanceId}")
      * @Template("MapbenderWmsBundle:Repository:instance.html.twig")
      */
-    public function instanceAction($slug, $instanceId)
+    public function instanceAction($slug, $instanceId, Request $request)
     {
         $wmsinstance = $this->getDoctrine()
             ->getRepository("MapbenderWmsBundle:WmsInstance")
             ->find($instanceId);
 
-        if ($this->getRequest()->getMethod() == 'POST') { //save
+        if ($request->getMethod() == 'POST') { //save
             $form = $this->createForm(new WmsInstanceInstanceLayersType(), $wmsinstance);
-            $form->bind($this->getRequest());
+            $form->bind($request);
             if ($form->isValid()) { //save
                 $em = $this->getDoctrine()->getManager();
                 $em->getConnection()->beginTransaction();
@@ -443,9 +442,9 @@ class RepositoryController extends Controller
      *
      * @ManagerRoute("/{slug}/instance/{instanceId}/priority/{instLayerId}")
      */
-    public function instanceLayerPriorityAction($slug, $instanceId, $instLayerId)
+    public function instanceLayerPriorityAction($slug, $instanceId, $instLayerId, Request $request)
     {
-        $number  = $this->getRequest()->get("number");
+        $number  = $request->get("number");
         $instLay = $this->getDoctrine()
             ->getRepository('MapbenderWmsBundle:WmsInstanceLayer')
             ->findOneById($instLayerId);
@@ -513,9 +512,9 @@ class RepositoryController extends Controller
      * @ManagerRoute("/instance/{slug}/enabled/{instanceId}")
      * @Method({ "POST" })
      */
-    public function instanceEnabledAction($slug, $instanceId)
+    public function instanceEnabledAction($slug, $instanceId, Request $request)
     {
-        $enabled     = $this->getRequest()->get("enabled");
+        $enabled     = $request->get("enabled");
         $wmsinstance = $this->getDoctrine()
             ->getRepository("MapbenderWmsBundle:WmsInstance")
             ->find($instanceId);
@@ -548,9 +547,9 @@ class RepositoryController extends Controller
      * @ManagerRoute("/instance/metadata")
      * @Method({ "POST" })
      */
-    public function metadataAction()
+    public function metadataAction(Request $request)
     {
-        $sourceId        = $this->container->getRequest()->get("sourceId", null);
+        $sourceId        = $request->get("sourceId", null);
         $instance        = $this->container->get("doctrine")
                 ->getRepository('Mapbender\CoreBundle\Entity\SourceInstance')->find($sourceId);
         $securityContext = $this->get('security.authorization_checker');
@@ -559,7 +558,7 @@ class RepositoryController extends Controller
             && !$securityContext->isGranted('VIEW', $instance->getLayerset()->getApplication())) {
             throw new AccessDeniedException();
         }
-        $layerName = $this->container->getRequest()->get("layerName", null);
+        $layerName = $request->get("layerName", null);
         $metadata  = $instance->getMetadata();
         $metadata->setContenttype(SourceMetadata::$CONTENTTYPE_ELEMENT);
         $metadata->setContainer(SourceMetadata::$CONTAINER_ACCORDION);

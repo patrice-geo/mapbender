@@ -31,11 +31,11 @@ class ElementController extends Controller
      * @Method({"GET","POST"})
      * @Template
      */
-    public function selectAction($slug)
+    public function selectAction($slug, Request $request)
     {
         $application = $this->get('mapbender')->getApplicationEntity($slug);
         $template    = $application->getTemplate();
-        $region      = $this->getRequest()->get('region');
+        $region      = $request->get('region');
         $whitelist   = null;
         $classNames  = null;
 
@@ -91,12 +91,12 @@ class ElementController extends Controller
      * @Method("GET")
      * @Template("MapbenderManagerBundle:Element:edit.html.twig")
      */
-    public function newAction($slug)
+    public function newAction($slug, Request $request)
     {
         $application = $this->get('mapbender')->getApplicationEntity($slug);
 
         // Get class for element
-        $class = $this->getRequest()->get('class');
+        $class = $request->get('class');
 
         if (!class_exists($class)) {
             throw new \RuntimeException('An Element class "' . $class
@@ -106,7 +106,7 @@ class ElementController extends Controller
         // Get first region (by default)
         $template = $application->getTemplate();
         $regions = $template::getRegions();
-        $region = $this->getRequest()->get('region');
+        $region = $request->get('region');
 
         $appl = new \Mapbender\CoreBundle\Component\Application($this->container,
             $application, array());
@@ -130,17 +130,17 @@ class ElementController extends Controller
      * @Method("POST")
      * @Template("MapbenderManagerBundle:Element:edit.html.twig")
      */
-    public function createAction($slug)
+    public function createAction($slug, Request $request)
     {
         $application = $this->get('mapbender')->getApplicationEntity($slug);
 
-        $data = $this->getRequest()->get('form');
+        $data = $request->get('form');
         $element = ComponentElement::getDefaultElement($data['class'],
                 $data['region']);
         $element->setApplication($application);
         $form = ComponentElement::getElementForm($this->container, $application,
                 $element);
-        $form['form']->bind($this->getRequest());
+        $form['form']->bind($request);
 
         if ($form['form']->isValid()) {
             $em = $this->getDoctrine()->getManager();
@@ -206,7 +206,7 @@ class ElementController extends Controller
      * @Method("POST")
      * @Template("MapbenderManagerBundle:Element:edit.html.twig")
      */
-    public function updateAction($slug, $id)
+    public function updateAction($slug, $id, Request $request)
     {
         $application = $this->get('mapbender')->getApplicationEntity($slug);
 
@@ -221,7 +221,7 @@ class ElementController extends Controller
         $form = ComponentElement::getElementForm($this->container, $application,
                 $element);
 //        $form = $this->getElementForm($application, $element);
-        $form['form']->bind($this->getRequest());
+        $form['form']->bind($request);
 
         if ($form['form']->isValid()) {
             $em = $this->getDoctrine()->getManager();
@@ -251,7 +251,7 @@ class ElementController extends Controller
      * @ManagerRoute("/application/{slug}/element/{id}/security", requirements={"id" = "\d+"})
      * @Template("MapbenderManagerBundle:Element:security.html.twig")
      */
-    public function securityAction($slug, $id)
+    public function securityAction($slug, $id, Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -266,10 +266,9 @@ class ElementController extends Controller
                 . $id . '" does not exist.');
         }
         $em->detach($element); // prevent element from being stored with default config/stored again
-        if ($this->getRequest()->getMethod() === 'POST') {
+        if ($request->getMethod() === 'POST') {
             $form = ComponentElement::getElementForm($this->container,
                     $application, $element, true);
-            $request = $this->getRequest();
             $form['form']->bind($request);
             if ($form['form']->isValid()) {
                 $em->getConnection()->beginTransaction();
@@ -389,7 +388,7 @@ class ElementController extends Controller
      * @ManagerRoute("application/element/{id}/weight")
      * @Method("POST")
      */
-    public function weightAction($id)
+    public function weightAction($id, Request $request)
     {
         $element = $this->getDoctrine()
             ->getRepository('MapbenderCoreBundle:Element')
@@ -399,8 +398,8 @@ class ElementController extends Controller
             throw $this->createNotFoundException('The element with the id "'
                 . $id . '" does not exist.');
         }
-        $number = $this->getRequest()->get("number");
-        $newregion = $this->getRequest()->get("region");
+        $number = $request->get("number");
+        $newregion = $request->get("region");
         if (intval($number) === $element->getWeight() && $element->getRegion() ===
             $newregion) {
             return new Response(json_encode(array(
@@ -507,13 +506,13 @@ class ElementController extends Controller
      * @ManagerRoute("application/element/{id}/enable")
      * @Method("POST")
      */
-    public function enableAction($id)
+    public function enableAction($id, Request $request)
     {
         $element = $this->getDoctrine()
             ->getRepository('MapbenderCoreBundle:Element')
             ->findOneById($id);
 
-        $enabled = $this->getRequest()->get("enabled");
+        $enabled = $request->get("enabled");
         if (!$element) {
             return new Response(json_encode(array(
                     'error' => 'An element with the id "' . $id . '" does not exist.')),
