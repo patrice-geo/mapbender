@@ -12,7 +12,6 @@ use Mapbender\CoreBundle\Asset\ApplicationAssetCache;
 use Mapbender\CoreBundle\Asset\AssetFactory;
 use Mapbender\CoreBundle\Component\Application;
 use Mapbender\CoreBundle\Component\EntityHandler;
-use Mapbender\CoreBundle\Component\SecurityContext;
 use Mapbender\CoreBundle\Entity\Application as ApplicationEntity;
 use OwsProxy3\CoreBundle\Component\CommonProxy;
 use OwsProxy3\CoreBundle\Component\ProxyQuery;
@@ -41,7 +40,7 @@ class ApplicationController extends Controller
      */
     private function getUrls($slug)
     {
-        $base_url = $this->get('request')->getBaseUrl();
+        $base_url = $this->get('request_stack')->getCurrentRequest()->getBaseUrl();
         $element_url = $this->get('router')
             ->generate('mapbender_core_application_element', array('slug' => $slug));
         $translation_url = $this->get('router')
@@ -79,7 +78,7 @@ class ApplicationController extends Controller
         // Create virtual file system path required for url rewriting inside CSS files
         $request = $this->getRequest();
         $route = $this->container->get('router')->getRouteCollection()->get($request->get('_route'));
-        $targetPath = $request->server->get('SCRIPT_FILENAME') . $route->getPattern();
+        $targetPath = $request->server->get('SCRIPT_FILENAME') . $route->getPath();
 
         $targetPath = str_replace('{slug}', $slug, $targetPath);
         $targetPath = $request->server->get('REQUEST_URI');
@@ -112,7 +111,7 @@ class ApplicationController extends Controller
         $response->headers->set('Content-Type', 'text/css');
         $response->setLastModified($lastModified);
         $response->headers->set('X-Asset-Modification-Time', $lastModified->format('c'));
-        if ($response->isNotModified($this->get('request'))) {
+        if ($response->isNotModified($this->get('request_stack')->getCurrentRequest())) {
             return $response;
         }
 
@@ -188,7 +187,7 @@ class ApplicationController extends Controller
         // Create HTTP 304 if possible
         $response->setLastModified($updateTime);
         $response->headers->set('X-Asset-Modification-Time', $asset_modification_time->format('c'));
-        if ($response->isNotModified($this->get('request'))) {
+        if ($response->isNotModified($this->get('request_stack')->getCurrentRequest())) {
             return $response;
         }
 
@@ -269,13 +268,14 @@ class ApplicationController extends Controller
      */
     public function checkApplicationAccess(Application $application)
     {
-        $securityContext = $this->get('security.context');
+        $securityContext = $this->get('security.authorization_checker');
+        $token = $this->get('security.token_storage');
 
         $application_entity = $application->getEntity();
         if ($application_entity::SOURCE_YAML === $application_entity->getSource() && count($application_entity->yaml_roles)) {
 
             // If no token, then check manually if some role IS_AUTHENTICATED_ANONYMOUSLY
-            if (!$securityContext->getToken()) {
+            if (!$token->getToken()) {
                 if (in_array('IS_AUTHENTICATED_ANONYMOUSLY', $application_entity->yaml_roles)) {
                     return;
                 }
@@ -310,8 +310,8 @@ class ApplicationController extends Controller
      */
     public function metadataAction($slug)
     {
-        $securityContext = $this->get('security.context');
-        $sourceId = $this->container->get('request')->get("sourceId", null);
+        $securityContext = $this->get('security.authorization_checker');
+        $sourceId = $this->container->get('request_stack')->getCurrentRequest()->get("sourceId", null);
         $instance = $this->container->get("doctrine")
                 ->getRepository('Mapbender\CoreBundle\Entity\SourceInstance')->find($sourceId);
         if (!$securityContext->isGranted('VIEW', new ObjectIdentity('class', 'Mapbender\CoreBundle\Entity\Application'))
@@ -328,7 +328,7 @@ class ApplicationController extends Controller
         $manager = $managers[$instance->getManagertype()];
 
         $path = array('_controller' => $manager['bundle'] . ":" . "Repository:metadata");
-        $subRequest = $this->container->get('request')->duplicate(array(), null, $path);
+        $subRequest = $this->container->get('request_stack')->getCurrentRequest()->duplicate(array(), null, $path);
         return $this->container->get('http_kernel')->handle(
                 $subRequest, HttpKernelInterface::SUB_REQUEST);
     }
@@ -342,7 +342,7 @@ class ApplicationController extends Controller
     {
         $instance = $this->container->get("doctrine")
                 ->getRepository('Mapbender\CoreBundle\Entity\SourceInstance')->find($instanceId);
-        $securityContext = $this->get('security.context');
+        $securityContext = $this->get('security.authorization_checker');
 
         if (!$securityContext->isGranted('VIEW', new ObjectIdentity('class', 'Mapbender\CoreBundle\Entity\Application'))
             && !$securityContext->isGranted('VIEW', $instance->getLayerset()->getApplication())) {
@@ -356,8 +356,8 @@ class ApplicationController extends Controller
 //        $params = $this->getRequest()->getMethod() == 'POST' ?
 //            $this->get("request")->request->all() : $this->get("request")->query->all();
         $headers = array();
-        $postParams = $this->get("request")->request->all();
-        $getParams = $this->get("request")->query->all();
+        $postParams = $this->get('request_stack')->getCurrentRequest()->request->all();
+        $getParams = $this->get('request_stack')->getCurrentRequest()->query->all();
         $user = $instance->getSource()->getUsername() ? $instance->getSource()->getUsername() : null;
         $password = $instance->getSource()->getUsername() ? $instance->getSource()->getPassword() : null;
         $instHandler = EntityHandler::createHandler($this->container, $instance);
