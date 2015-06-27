@@ -874,10 +874,17 @@ class ApplicationController extends Controller
     {
         $available_elements = array();
         foreach ($this->get('mapbender')->getElements() as $elementClassName) {
-            $available_elements[$elementClassName] = array(
-                'title' => $elementClassName::getClassTitle(),
-                'description' => $elementClassName::getClassDescription(),
-                'tags' => $elementClassName::getClassTags());
+            if(class_exists($elementClassName)) {
+                $available_elements[$elementClassName] = array(
+                    'title' => $elementClassName::getClassTitle(),
+                    'description' => $elementClassName::getClassDescription(),
+                    'tags' => $elementClassName::getClassTags());
+            } else {
+                $available_elements[$elementClassName] = array(
+                    'title' => '(element class unavailable)',
+                    'description' => '(element class unavailable)',
+                    'tags' => array());
+            }
         }
         asort($available_elements);
 

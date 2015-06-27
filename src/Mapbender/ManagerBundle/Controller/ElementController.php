@@ -59,15 +59,21 @@ class ElementController extends Controller
                                    : $this->get('mapbender')->getElements();
 
         foreach ($classNames as $elementClassName) {
-            $title = $trans->trans($elementClassName::getClassTitle());
-            $tags = array();
-            foreach ($elementClassName::getClassTags() as $tag) {
-                $tags[] = $trans->trans($tag);
+            if(class_exists($elementClassName)) {
+                $title = $trans->trans($elementClassName::getClassTitle());
+                $tags = array();
+                foreach ($elementClassName::getClassTags() as $tag) {
+                    $tags[] = $trans->trans($tag);
+                }
+                $desc = $elementClassName::getClassDescription();
+            } else {
+                $title = '(element class unavailable)';
+                $desc = $title;
             }
             $elements[$title] = array(
                 'class' => $elementClassName,
                 'title' => $title,
-                'description' => $trans->trans($elementClassName::getClassDescription()),
+                'description' => $trans->trans($desc),
                 'tags' => $tags);
         }
 

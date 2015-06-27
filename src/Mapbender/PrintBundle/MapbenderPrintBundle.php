@@ -24,9 +24,7 @@ class MapbenderPrintBundle extends MapbenderBundle
     public function getElements()
     {
         return array(
-            'Mapbender\PrintBundle\Element\ImageExport'
             );
     }
 
 }
-
