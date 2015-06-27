@@ -7,6 +7,6 @@
 {% endblock %}
 
 {% block manager_content %}
-  {% render controller(manager.updateformAction, {'sourceId': source.id}) %}
+  {% render(controller(manager.updateformAction, {'sourceId': source.id})) %}
   <div class="clearContainer"></div>
 {% endblock %}

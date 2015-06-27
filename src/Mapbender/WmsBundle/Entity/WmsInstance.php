@@ -27,7 +27,7 @@ class WmsInstance extends SourceInstance
     protected $configuration;
 
     /**
-     * @ORM\ManyToOne(targetEntity="WmsSource", inversedBy="instance", cascade={"refresh"})
+     * @ORM\ManyToOne(targetEntity="WmsSource", inversedBy="instances", cascade={"refresh"})
      * @ORM\JoinColumn(name="wmssource", referencedColumnName="id")
      */
     protected $source;
@@ -88,7 +88,7 @@ class WmsInstance extends SourceInstance
      * @ORM\Column(type="array", nullable=true)
      */
     protected $dimensions;
-    
+
     /**
      * @ORM\Column(type="array", nullable=true)
      */
