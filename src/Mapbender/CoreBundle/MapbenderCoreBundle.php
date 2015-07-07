@@ -49,7 +49,7 @@ class MapbenderCoreBundle extends MapbenderBundle
             'Mapbender\CoreBundle\Element\ActivityIndicator',
             'Mapbender\CoreBundle\Element\BaseSourceSwitcher',
             'Mapbender\CoreBundle\Element\Button',
-            'Mapbender\CoreBundle\Element\CoordinatesDisplay',
+            #'Mapbender\CoreBundle\Element\CoordinatesDisplay',
             'Mapbender\CoreBundle\Element\Copyright',
             'Mapbender\CoreBundle\Element\FeatureInfo',
             'Mapbender\CoreBundle\Element\GpsPosition',
