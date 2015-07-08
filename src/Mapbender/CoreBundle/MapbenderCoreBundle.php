@@ -49,7 +49,7 @@ class MapbenderCoreBundle extends MapbenderBundle
             'Mapbender\CoreBundle\Element\ActivityIndicator',
             'Mapbender\CoreBundle\Element\BaseSourceSwitcher',
             'Mapbender\CoreBundle\Element\Button',
-            #'Mapbender\CoreBundle\Element\CoordinatesDisplay',
+            #'Mapbender\CoordinatesDisplayBundle\Element\CoordinatesDisplay',
             'Mapbender\CoreBundle\Element\Copyright',
             'Mapbender\CoreBundle\Element\FeatureInfo',
             'Mapbender\CoreBundle\Element\GpsPosition',
@@ -58,7 +58,7 @@ class MapbenderCoreBundle extends MapbenderBundle
             'Mapbender\CoreBundle\Element\Legend',
             'Mapbender\CoreBundle\Element\Map',
             'Mapbender\CoreBundle\Element\Overview',
-            'Mapbender\CoreBundle\Element\POI',
+            #'Mapbender\CoreBundle\Element\POI',
             'Mapbender\CoreBundle\Element\PrintClient',
             'Mapbender\CoreBundle\Element\Ruler',
             'Mapbender\CoreBundle\Element\ScaleBar',
@@ -67,7 +67,7 @@ class MapbenderCoreBundle extends MapbenderBundle
             'Mapbender\CoreBundle\Element\SearchRouter',
             'Mapbender\CoreBundle\Element\SimpleSearch',
             'Mapbender\CoreBundle\Element\Sketch',
-            #'Mapbender\CoreBundle\Element\SrsSelector',
+            #'Mapbender\SrsSelectorBundle\Element\SrsSelector',
             'Mapbender\CoreBundle\Element\ZoomBar',
             'Mapbender\CoreBundle\Element\Redlining'
         );
