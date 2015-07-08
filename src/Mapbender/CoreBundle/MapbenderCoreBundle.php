@@ -47,7 +47,7 @@ class MapbenderCoreBundle extends MapbenderBundle
         return array(
             'Mapbender\AboutBundle\Element\AboutDialog',
             'Mapbender\CoreBundle\Element\ActivityIndicator',
-            'Mapbender\CoreBundle\Element\BaseSourceSwitcher',
+            #'Mapbender\CoreBundle\Element\BaseSourceSwitcher',
             'Mapbender\CoreBundle\Element\Button',
             #'Mapbender\CoordinatesDisplayBundle\Element\CoordinatesDisplay',
             'Mapbender\CoreBundle\Element\Copyright',
