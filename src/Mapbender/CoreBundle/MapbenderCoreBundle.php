@@ -45,8 +45,8 @@ class MapbenderCoreBundle extends MapbenderBundle
     public function getElements()
     {
         return array(
-            'Mapbender\AboutBundle\Element\AboutDialog',
-            'Mapbender\CoreBundle\Element\ActivityIndicator',
+            #'Mapbender\AboutBundle\Element\AboutDialog',
+            #'Mapbender\CoreBundle\Element\ActivityIndicator',
             #'Mapbender\CoreBundle\Element\BaseSourceSwitcher',
             'Mapbender\CoreBundle\Element\Button',
             #'Mapbender\CoordinatesDisplayBundle\Element\CoordinatesDisplay',
