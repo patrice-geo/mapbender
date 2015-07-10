@@ -63,7 +63,7 @@ class MapbenderCoreBundle extends MapbenderBundle
             #'Mapbender\CoreBundle\Element\Ruler',
             #'Mapbender\CoreBundle\Element\ScaleBar',
             #'Mapbender\CoreBundle\Element\ScaleDisplay',
-            'Mapbender\CoreBundle\Element\ScaleSelector',
+            #'Mapbender\CoreBundle\Element\ScaleSelector',
             'Mapbender\CoreBundle\Element\SearchRouter',
             'Mapbender\CoreBundle\Element\SimpleSearch',
             'Mapbender\CoreBundle\Element\Sketch',
