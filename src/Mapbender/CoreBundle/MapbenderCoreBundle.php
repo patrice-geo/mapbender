@@ -68,7 +68,7 @@ class MapbenderCoreBundle extends MapbenderBundle
             'Mapbender\CoreBundle\Element\SimpleSearch',
             'Mapbender\CoreBundle\Element\Sketch',
             #'Mapbender\SrsSelectorBundle\Element\SrsSelector',
-            'Mapbender\CoreBundle\Element\ZoomBar',
+            #'Mapbender\CoreBundle\Element\ZoomBar',
             'Mapbender\CoreBundle\Element\Redlining'
         );
     }
