@@ -218,7 +218,7 @@ class ApplicationController extends Controller
      * @Method("POST")
      * @Template("MapbenderManagerBundle:Application:new.html.twig")
      */
-    public function createAction($request)
+    public function createAction(Request $request)
     {
         $application      = new Application();
         $uploadScreenshot = new UploadScreenshot();
