@@ -66,7 +66,7 @@ class MapbenderCoreBundle extends MapbenderBundle
             #'Mapbender\CoreBundle\Element\ScaleSelector',
             #'Mapbender\CoreBundle\Element\SearchRouter',
             'Mapbender\CoreBundle\Element\SimpleSearch',
-            'Mapbender\CoreBundle\Element\Sketch',
+            #'Mapbender\CoreBundle\Element\Sketch',
             #'Mapbender\SrsSelectorBundle\Element\SrsSelector',
             #'Mapbender\CoreBundle\Element\ZoomBar',
             'Mapbender\CoreBundle\Element\Redlining'
