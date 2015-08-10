@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from selenium.webdriver.phantomjs.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -7,6 +6,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from lib.user import login
 from lib.logout import logout
 from lib.utils import get_sreenshot_path, create_webdriver  # Changed
+
+import time
 
 success = True
 wd = create_webdriver()
@@ -39,8 +40,10 @@ try:
     wd.find_element_by_css_selector("span.iconRemove.iconSmall").click()
     wd.save_screenshot(get_sreenshot_path('test'))  # Changed
     wd.find_element_by_link_text("Delete").click()
+    time.sleep(10)
     logout(wd)
     wd.save_screenshot(get_sreenshot_path('success'))  # Changed
+    time.sleep(50)
 except Exception as e:  # Changed ff
     wd.save_screenshot(get_sreenshot_path('error'))
     wd.quit()

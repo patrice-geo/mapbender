@@ -1,6 +1,6 @@
 import __main__
-#from selenium.webdriver.firefox.webdriver import WebDriver
-from selenium.webdriver.phantomjs.webdriver import WebDriver
+from selenium.webdriver.firefox.webdriver import WebDriver
+#from selenium.webdriver.phantomjs.webdriver import WebDriver
 from os import getenv, makedirs
 from os.path import basename, dirname, exists
 
@@ -27,5 +27,5 @@ def get_sreenshot_path(suffix):
 def create_webdriver():
     wd = WebDriver()
     wd.implicitly_wait(60)
-    wd.set_window_size(1400,1000)
+    wd.set_window_size(1800,1200)
     return wd
