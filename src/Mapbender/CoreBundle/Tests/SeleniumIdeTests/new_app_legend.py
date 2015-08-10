@@ -24,12 +24,12 @@ try:
     login(wd)
     wd.find_element_by_link_text("Mapbender Demo Map").click()
     wd.find_element_by_xpath("//label[contains(text(), 'Legend')]").click()
-    time.sleep(5)
+    time.sleep(2)
     element = WebDriverWait(wd, 10).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, "div.popup"))
     )
     popup_title = wd.find_element_by_css_selector("span.popupTitle").text
-    time.sleep(5)
+    time.sleep(2)
     if popup_title == 'Legend':
 	content = wd.find_element_by_css_selector("li.image")
 	content = content.get_attribute('innerHTML') 
@@ -37,7 +37,7 @@ try:
 	'''wd.execute_script("""var content = arguments[0];console.log(content);""", content)'''
         if popup_title == 'Legend' and len(content) > 0:
             wd.execute_script("console.log('success');")
-            time.sleep(5)
+            time.sleep(2)
         else:
             wd.execute_script("console.log('NoSuccess');")
             success = False

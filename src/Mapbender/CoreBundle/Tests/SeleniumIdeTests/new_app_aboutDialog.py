@@ -23,7 +23,7 @@ def is_alert_present(wd):
 
 try:
     login(wd)
-    time.sleep(20)
+    time.sleep(2)
     wd.find_element_by_link_text("Mapbender Demo Map").click()
     wd.find_element_by_css_selector("span.mb-aboutButton").click()
     element = WebDriverWait(wd, 10).until(

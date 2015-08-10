@@ -23,7 +23,7 @@ try:
     #wd.find_element_by_css_selector("div.mb-element-layertree:eq(1)").click()
     wd.execute_script("$('.mb-element-map').data('mapbender-mbMap').map.olMap.layers[1].setVisibility(false);")
     wd.execute_script("$('.mb-element-map').data('mapbender-mbMap').map.olMap.layers[2].setVisibility(false);")
-    time.sleep(5)
+    time.sleep(2)
     '''
     
     

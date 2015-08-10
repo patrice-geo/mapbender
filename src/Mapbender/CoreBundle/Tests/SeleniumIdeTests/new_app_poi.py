@@ -28,14 +28,14 @@ try:
         EC.visibility_of_element_located((By.CSS_SELECTOR, "div.popup"))
     )
     wd.find_element_by_tag_name("svg").click()
-    time.sleep(5)
+    time.sleep(2)
     subtitle = wd.find_element_by_css_selector("span.popupSubTitle")
     coordinates = subtitle.get_attribute('innerHTML') 
     #return python variable to browser
     '''wd.execute_script("""var content = arguments[0];console.log(content);""", content)'''
     if len(coordinates) > 0:
         wd.execute_script("console.log('success');")
-        time.sleep(5)
+        time.sleep(2)
     else:
         wd.execute_script("console.log('NoSuccess');")
         success = False
