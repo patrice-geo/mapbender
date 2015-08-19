@@ -38,6 +38,9 @@
                             for(var i = 0; i < layers.layers.length; i++){
                                 ls += layers.layers[i].options.name !== "" ? "," + layers.layers[i].options.name : "";
                             }
+                            if(layerDef.configuration.options.proxy) {
+                                layerDef.configuration.options.url = Mapbender.configuration.application.urls.proxy + '?url=' + encodeURIComponent(layerDef.configuration.options.url);
+                            }
                             layers_overview.push(new OpenLayers.Layer.WMS(
                                 layerDef.title,
                                 layerDef.configuration.options.url,
@@ -86,15 +89,15 @@
 //            ,autoPan: false
                 });
             }
-            this.overview = new OpenLayers.Control.OverviewMap(overviewOptions);          
+            this.overview = new OpenLayers.Control.OverviewMap(overviewOptions);
             mbMap.map.olMap.addControl(this.overview);
             $(document).bind('mbmapsrschanged', $.proxy(this._changeSrs, this));
             $(self.element).find('.toggleOverview').bind('click', $.proxy(this._openClose, this));
-            
+
             if(!this.options.maximized){
                 $(this.element).addClass("closed");
-            }    
-                
+            }
+
             this._trigger('ready');
             this._ready();
         },
