@@ -181,11 +181,12 @@ $(function() {
                             subContent = contentWrapper.find('.popupSubContent');
                         }
                         subContent.html(data.responseText);
-
+                        pop.find('.popupScroll').scrollTop(0);
                         var subTitle = subContent.find("#form_title").val();
                         $(".popupSubTitle").text(" - " + subTitle);
                         $(".popup").find(".buttonYes, .buttonBack").show();
                         subContent.on('submit', 'form', submitHandler);
+                        subContent.closest(".popupScroll").scrollTop(0);
                     }
                 }
             });
@@ -825,23 +826,17 @@ $(function() {
             codeMirror.focus();
         });
     })(jQuery);
-    // Prototype: activate tabs by loading
     (function($) {
-        var activeTab = window.location.hash;
-        if (activeTab && activeTab !== '#') {
-            $(".tabContainer .tab"+activeTab+", .tabContainerAlt .tab"+activeTab).click();
-        } else {
-            activeTab = null;
+        var tabkey = 'manager_active_tab';
+        if (typeof(Storage) !== "undefined" && window.sessionStorage && window.sessionStorage[tabkey]) {
+            var id = window.sessionStorage[tabkey];
+            $(".tabContainer .tab#" + id + ", .tabContainerAlt .tab#" + id).click();
         }
-        $(".tabContainer, .tabContainerAlt").on('click', '.tab', function (){
-            activeTab = '#' + $(this).attr('id');
-        });
-        $('form[name="application"]').on('submit', function(){
-            if(activeTab) {
-                var newurl = $(this).attr('action');
-                $(this).attr('action', newurl + activeTab);
+        $(".tabContainer, .tabContainerAlt").on('click', '.tab', function() {
+            if (typeof(Storage) !== "undefined" && window.sessionStorage) {
+                window.sessionStorage.setItem(tabkey, $(this).attr('id'));
             }
-            return true;
         });
     })(jQuery);
 });
+
