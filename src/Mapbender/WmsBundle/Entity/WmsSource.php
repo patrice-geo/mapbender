@@ -8,7 +8,6 @@ use Mapbender\CoreBundle\Entity\Contact;
 use Mapbender\CoreBundle\Entity\Keyword;
 use Mapbender\CoreBundle\Entity\Source;
 use Mapbender\WmsBundle\Component\RequestInformation;
-use Mapbender\WmsBundle\Entity\WmsLayerSource;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -127,50 +126,50 @@ class WmsSource extends Source implements ContainingKeyword
      * @var RequestInformation A request information for the GetCapabilities operation
      * @ORM\Column(type="object", nullable=true)
      */
-    //@TODO Doctrine bug: "protected" replaced with "public"
-    public $getCapabilities = null;
+    //@TODO Doctrine bug: "protected" replaced with "protected"
+    protected $getCapabilities = null;
 
     /**
      * @var RequestInformation A request information for the GetMap operation
      * @ORM\Column(type="object", nullable=true)
      */
-    //@TODO Doctrine bug: "protected" replaced with "public"
-    public $getMap = null;
+    //@TODO Doctrine bug: "protected" replaced with "protected"
+    protected $getMap = null;
 
     /**
      * @var RequestInformation A request information for the GetFeatureInfo operation
      * @ORM\Column(type="object", nullable=true)
      */
-    //@TODO Doctrine bug: "protected" replaced with "public"
-    public $getFeatureInfo = null;
+    //@TODO Doctrine bug: "protected" replaced with "protected"
+    protected $getFeatureInfo = null;
 
     /**
      * @var RequestInformation A request information for the DescribeLayer operation
      * @ORM\Column(type="object", nullable=true)
      */
-    //@TODO Doctrine bug: "protected" replaced with "public"
-    public $describeLayer = null;
+    //@TODO Doctrine bug: "protected" replaced with "protected"
+    protected $describeLayer = null;
 
     /**
      * @var RequestInformation A request information for the GetLegendGraphic operation
      * @ORM\Column(type="object", nullable=true)
      */
-    //@TODO Doctrine bug: "protected" replaced with "public"
-    public $getLegendGraphic = null;
+    //@TODO Doctrine bug: "protected" replaced with "protected"
+    protected $getLegendGraphic = null;
 
     /**
      * @var RequestInformation A request information for the GetStyles operation
      * @ORM\Column(type="object", nullable=true)
      */
-    //@TODO Doctrine bug: "protected" replaced with "public"
-    public $getStyles = null;
+    //@TODO Doctrine bug: "protected" replaced with "protected"
+    protected $getStyles = null;
 
     /**
      * @var RequestInformation A request information for the PutStyles operation
      * @ORM\Column(type="object", nullable=true)
      */
-    //@TODO Doctrine bug: "protected" replaced with "public"
-    public $putStyles = null;
+    //@TODO Doctrine bug: "protected" replaced with "protected"
+    protected $putStyles = null;
 
     /**
      * @var string a user name
@@ -200,7 +199,7 @@ class WmsSource extends Source implements ContainingKeyword
 
     /**
      * @var ArrayCollections A list of WMS instances
-     * @ORM\OneToMany(targetEntity="WmsInstance",mappedBy="source", cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="WmsInstance", mappedBy="source", cascade={"remove"})
      */
     protected $instances;
 
@@ -610,7 +609,7 @@ class WmsSource extends Source implements ContainingKeyword
     /**
      * Set getCapabilities
      *
-     * @param Object $getCapabilities
+     * @param RequestInformation $getCapabilities
      * @return WmsSource
      */
     public function setGetCapabilities(RequestInformation $getCapabilities = NULL)

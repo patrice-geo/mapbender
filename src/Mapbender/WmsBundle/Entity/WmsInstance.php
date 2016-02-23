@@ -6,8 +6,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Mapbender\CoreBundle\Entity\SourceInstance;
 use Mapbender\WmsBundle\Component\WmsMetadata;
-use Mapbender\WmsBundle\Entity\WmsInstanceLayer;
-use Mapbender\WmsBundle\Entity\WmsSource;
 
 /**
  * WmsInstance class
@@ -27,8 +25,9 @@ class WmsInstance extends SourceInstance
     protected $configuration;
 
     /**
-     * @ORM\ManyToOne(targetEntity="WmsSource", inversedBy="instance", cascade={"refresh"})
+     * @ORM\ManyToOne(targetEntity="WmsSource", inversedBy="instances", cascade={"refresh"})
      * @ORM\JoinColumn(name="wmssource", referencedColumnName="id")
+     * @var WmsSource
      */
     protected $source;
 
@@ -181,6 +180,7 @@ class WmsInstance extends SourceInstance
      * Set configuration
      *
      * @param array $configuration
+     * @return $this
      */
     public function setConfiguration($configuration)
     {
@@ -525,7 +525,7 @@ class WmsInstance extends SourceInstance
     /**
      * Add layers
      *
-     * @param WmsInstanceLayer $layers
+     * @param WmsInstanceLayer $layer
      * @return WmsInstance
      */
     public function addLayer(WmsInstanceLayer $layer)
