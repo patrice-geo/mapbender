@@ -9,8 +9,6 @@
 namespace Mapbender\ManagerBundle\Component;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Mapbender\ManagerBundle\Component\ExchangeNormalizer;
-use Mapbender\ManagerBundle\Component\ExchangeJob;
 use Mapbender\ManagerBundle\Form\Type\ExportJobType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Yaml\Dumper;

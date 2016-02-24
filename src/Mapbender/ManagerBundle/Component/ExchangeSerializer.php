@@ -29,11 +29,12 @@ abstract class ExchangeSerializer
     const KEY_MAP           = 'map';
     const KEY_PRIMARY       = 'primary';
     const KEY_CONFIGURATION = 'configuration';
-    const KEY_GET = 'get';
-    const KEY_SET = 'set';
-    const KEY_ADD = 'add';
-    const KEY_HAS = 'has';
-    const KEY_IS  = 'is';
+    const KEY_GET           = 'get';
+    const KEY_SET           = 'set';
+    const KEY_ADD           = 'add';
+    const KEY_HAS           = 'has';
+    const KEY_IS            = 'is';
+    const EMPTY_KEY         = '';
 
     protected $container;
 
@@ -102,19 +103,20 @@ abstract class ExchangeSerializer
         }
     }
 
-    
-    public function getRealClass($object)
+
+    public function getRealClass(&$object)
     {
-        $objClass = "";
         if (is_object($object)) {
             $objClass = ClassUtils::getClass($object);
         } elseif (is_string($object)) {
             $objClass = ClassUtils::getRealClass($object);
+        } else {
+            $objClass = self::EMPTY_KEY;
         }
         return $objClass;
     }
 
-    public function createRealObject($object)
+    public function createRealObject(&$object)
     {
         $objClass        = $this->getRealClass($object);
         $reflectionClass = new \ReflectionClass($objClass);
@@ -129,7 +131,7 @@ abstract class ExchangeSerializer
         }
     }
 
-    public function createInstanceIdent($object, $params = array())
+    public function createInstanceIdent(&$object, $params = array())
     {
         return array_merge(
             array(
@@ -144,13 +146,14 @@ abstract class ExchangeSerializer
 
     /**
      * Creates a list of key value pairs for unique search of entities.
-     * @param mixed $data entity object or serialized entity object (array)
-     * @param \Mapbender\ManagerBundle\Component\ClassMetadata $meta
-     * @param boolean $addUniques flag to add of uniques fields
-     * @param array $added a list of added fields
+     *
+     * @param mixed         $data       entity object or serialized entity object (array)
+     * @param ClassMetadata $meta
+     * @param boolean       $addUniques flag to add of uniques fields
+     * @param array         $added      a list of added fields
      * @return array list of search parameters (criteria)
      */
-    public function getIdentCriteria($data, ClassMetadata $meta, $addUniques = false, array $added = array())
+    public function getIdentCriteria(&$data, ClassMetadata $meta, $addUniques = false, array $added = array())
     {
         if (is_array($data)) {
             return $this->criteriaFromData($data, $meta, $addUniques, $added);
@@ -169,7 +172,7 @@ abstract class ExchangeSerializer
      * @param array $added a list of added fields
      * @return array list of search parameters (criteria)
      */
-    private function criteriaFromData(array $data, ClassMetadata $meta, $addUniques = false, array $added = array())
+    private function criteriaFromData(array &$data, ClassMetadata $meta, $addUniques = false, array $added = array())
     {
         $criteria = array();
         $idents   = $meta->getIdentifier();
@@ -193,7 +196,7 @@ abstract class ExchangeSerializer
         return $criteria;
     }
 
-    private function criteriaFromObject($object, ClassMetadata $meta, $addUniques = false, array $added = array())
+    private function criteriaFromObject(&$object, ClassMetadata $meta, $addUniques = false, array $added = array())
     {
         $criteria = array();
         $idents = $meta->getIdentifier();
@@ -220,7 +223,7 @@ abstract class ExchangeSerializer
         return $criteria;
     }
 
-    public function getClassName($data)
+    public function getClassName(&$data)
     {
         $class = $this->getClassDifinition($data);
         if (!$class) {
@@ -230,7 +233,7 @@ abstract class ExchangeSerializer
         }
     }
 
-    public function getClassDifinition($data)
+    public function getClassDifinition(&$data)
     {
         if (!$data || !is_array($data)) {
             return null;
@@ -241,7 +244,7 @@ abstract class ExchangeSerializer
         }
     }
 
-    public function getClassConstructParams($data)
+    public function getClassConstructParams(&$data)
     {
         $class = $this->getClassDifinition($data);
         if (!$class) {
