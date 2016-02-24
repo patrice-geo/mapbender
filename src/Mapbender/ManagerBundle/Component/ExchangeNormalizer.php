@@ -8,9 +8,9 @@
 
 namespace Mapbender\ManagerBundle\Component;
 
+use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\PersistentCollection;
-use Doctrine\Common\Persistence\Mapping\MappingException;
 use Mapbender\CoreBundle\Utils\ArrayUtil;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -45,17 +45,23 @@ class ExchangeNormalizer extends ExchangeSerializer
         return $this->export;
     }
 
-    private function isInProcess(array $objectData, $classMeta)
+    /**
+     * @param array $objectData
+     * @param       ClassMetadata $classMeta
+     * @return bool
+     */
+    private function isInProcess(array $objectData, ClassMetadata $classMeta)
     {
-        $class = $classMeta->getReflectionClass()->getName();
-        if (!isset($this->inProcess[$class])) {
+        $className = $classMeta->getName();
+        if (!isset($this->inProcess[ $className ])) {
             return false;
         }
-        foreach ($this->inProcess[$class] as $array) {
-            $idents = $classMeta->getIdentifier();
+
+        $identifiers    = $classMeta->getIdentifier();
+        foreach ($this->inProcess[ $className ] as &$idKey) {
             $found = true;
-            foreach ($idents as $ident) {
-                $found = $found && $array[$ident] === $objectData[$ident];
+            foreach ($identifiers as &$ident) {
+                $found = $found && $idKey[ $ident ] === $objectData[ $ident ];
             }
             if ($found) {
                 return true;
@@ -138,7 +144,7 @@ class ExchangeNormalizer extends ExchangeSerializer
 
     public function handleValue($value)
     {
-        if ($value === null || is_integer($value) || is_float($value) || is_string($value) || is_bool($value)) {
+        if (is_scalar($value)) {
             return $value;
         } elseif (is_array($value)) {
             return $this->handleArray($value);
