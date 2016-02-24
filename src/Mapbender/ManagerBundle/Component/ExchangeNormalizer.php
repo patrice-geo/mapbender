@@ -40,6 +40,9 @@ class ExchangeNormalizer extends ExchangeSerializer
         $this->inProcess = array();
     }
 
+    /**
+     * @return array
+     */
     public function getExport()
     {
         return $this->export;
@@ -70,9 +73,13 @@ class ExchangeNormalizer extends ExchangeSerializer
         return false;
     }
 
-    private function addInProcess(array $objectData, $classMeta)
+    /**
+     * @param array         $objectData
+     * @param ClassMetadata $classMeta
+     */
+    private function addInProcess(array $objectData, ClassMetadata $classMeta)
     {
-        $class = $classMeta->getReflectionClass()->getName();
+        $class = $classMeta->getName();
         if (!isset($this->inProcess[$class])) {
             $this->inProcess[$class] = array();
         }
@@ -81,14 +88,19 @@ class ExchangeNormalizer extends ExchangeSerializer
         }
     }
 
-    private function isExported(array $objectData, $classMeta)
+    /**
+     * @param array         $objectData
+     * @param ClassMetadata $classMeta
+     * @return bool
+     */
+    private function isExported(array $objectData, ClassMetadata $classMeta)
     {
-        $class = $classMeta->getReflectionClass()->getName();
+        $class = $classMeta->getName();
         if (!isset($this->export[$class])) {
             return false;
         }
+        $idents = $classMeta->getIdentifier();
         foreach ($this->export[$class] as $array) {
-            $idents = $classMeta->getIdentifier();
             $subfound = true;
             foreach ($idents as $ident) {
                 $subfound = $subfound && $array[$ident] === $objectData[$ident];
@@ -100,9 +112,13 @@ class ExchangeNormalizer extends ExchangeSerializer
         return false;
     }
 
-    private function addExport(array $objectData, $classMeta)
+    /**
+     * @param array         $objectData
+     * @param ClassMetadata $classMeta
+     */
+    private function addExport(array $objectData, ClassMetadata $classMeta)
     {
-        $class = $classMeta->getReflectionClass()->getName();
+        $class = $classMeta->getName();
         if (!isset($this->export[$class])) {
             $this->export[$class] = array();
         }
@@ -111,6 +127,11 @@ class ExchangeNormalizer extends ExchangeSerializer
         }
     }
 
+    /**
+     * @param                    $object
+     * @param ClassMetadata|null $classMeta
+     * @return array
+     */
     private function handleIdentParams($object, ClassMetadata $classMeta = null)
     {
         if (!$classMeta) {
@@ -142,6 +163,10 @@ class ExchangeNormalizer extends ExchangeSerializer
         return $result;
     }
 
+    /**
+     * @param $value
+     * @return array|string
+     */
     public function handleValue($value)
     {
         if (is_scalar($value)) {
@@ -161,6 +186,11 @@ class ExchangeNormalizer extends ExchangeSerializer
         }
     }
 
+    /**
+     * @param               $object
+     * @param ClassMetadata $classMeta
+     * @return array
+     */
     public function normalizeEntity($object, ClassMetadata $classMeta)
     {
         $this->em->refresh($object);
@@ -168,8 +198,9 @@ class ExchangeNormalizer extends ExchangeSerializer
         $this->addInProcess($data, $classMeta);
         foreach ($classMeta->getFieldNames() as $fieldName) {
             if (!in_array($fieldName, $classMeta->getIdentifier())
-                && $getMethod = $this->getReturnMethod($fieldName, $classMeta->getReflectionClass())) {
-                $data[$fieldName] = $this->handleValue($getMethod->invoke($object));
+                && $getMethod = $this->getReturnMethod($fieldName, $classMeta->getReflectionClass())
+            ) {
+                $data[ $fieldName ] = $this->handleValue($getMethod->invoke($object));
             }
         }
         foreach ($classMeta->getAssociationMappings() as $assocItem) {
@@ -177,23 +208,23 @@ class ExchangeNormalizer extends ExchangeSerializer
             if ($getMethod = $this->getReturnMethod($fieldName, $classMeta->getReflectionClass())) {
                 $subObject = $getMethod->invoke($object);
                 if (!$subObject) {
-                    $data[$fieldName] = null;
+                    $data[ $fieldName ] = null;
                 } elseif ($subObject instanceof PersistentCollection) {
-                    $data[$fieldName] = array();
+                    $data[ $fieldName ] = array();
                     foreach ($subObject as $item) {
-                        $ident = $this->handleIdentParams($item);
-                        $data[$fieldName][] = $ident;
-                        $itemRealClass = $this->getRealClass($item);
-                        $itemClassMeta = $this->em->getClassMetadata($itemRealClass);
+                        $ident                = $this->handleIdentParams($item);
+                        $data[ $fieldName ][] = $ident;
+                        $itemRealClass        = $this->getRealClass($item);
+                        $itemClassMeta        = $this->em->getClassMetadata($itemRealClass);
                         if (!$this->isInProcess($ident, $itemClassMeta)) {
                             $this->normalizeEntity($item, $itemClassMeta);
                         }
                     }
                 } else {
-                    $data[$fieldName] = $this->handleIdentParams($subObject);
+                    $data[ $fieldName ] = $this->handleIdentParams($subObject);
                     $subObjectRealClass = $this->getRealClass($subObject);
                     $subObjectClassMeta = $this->em->getClassMetadata($subObjectRealClass);
-                    if (!$this->isInProcess($data[$fieldName], $subObjectClassMeta)) {
+                    if (!$this->isInProcess($data[ $fieldName ], $subObjectClassMeta)) {
                         $this->normalizeEntity($subObject, $subObjectClassMeta);
                     }
                 }
@@ -203,6 +234,11 @@ class ExchangeNormalizer extends ExchangeSerializer
         return $data;
     }
 
+    /**
+     * @param                  $object
+     * @param \ReflectionClass $class
+     * @return array
+     */
     public function normalizeObject($object, \ReflectionClass $class)
     {
         $data = $this->createInstanceIdent($object);
