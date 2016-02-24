@@ -1,15 +1,8 @@
 <?php
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 namespace Mapbender\ManagerBundle\Component;
 
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Mapbender\CoreBundle\Utils\EntityAnnotationParser as EAP;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -22,9 +15,9 @@ abstract class ExchangeSerializer
     const KEY_CLASS         = '__class__';
     const KEY_SLUG          = 'slug';
     const KEY_IDENTIFIER    = 'identifier';
-    const KEY_GETTER        = EAP::GETTER;
-    const KEY_SETTER        = EAP::SETTER;
-    const KEY_COLUMN        = EAP::COLUMN;
+    const KEY_GETTER        = 'getter';
+    const KEY_SETTER        = 'setter';
+    const KEY_COLUMN        = 'column';
     const KEY_UNIQUE        = 'unique';
     const KEY_MAP           = 'map';
     const KEY_PRIMARY       = 'primary';
@@ -69,7 +62,6 @@ abstract class ExchangeSerializer
 
     public function getReturnMethod($fieldName, \ReflectionClass $class)
     {
-        $method = null;
         if ($method = $this->getMethodName($fieldName, self::KEY_GET, $class)) {
             return $method;
         } elseif ($method = $this->getMethodName($fieldName, self::KEY_IS, $class)) {
@@ -89,17 +81,22 @@ abstract class ExchangeSerializer
         }
     }
 
+
     public function getMethodName($fieldName, $prefix, \ReflectionClass $class)
     {
+        static $classMethods = array();
+        $methodId = $class->getName() . $prefix . $fieldName;
+        if (isset($classMethods[ $methodId ])) {
+            return $classMethods[ $methodId ];
+        }
         $methodHash = "";
         foreach (preg_split("/_/", $fieldName) as $chunk) {
             $chunk = ucwords($chunk);
             $methodHash .= $chunk;
         }
         if ($class->hasMethod($prefix . $methodHash)) {
-            return $class->getMethod($prefix . $methodHash);
-        } else {
-            return null;
+            $methodName = $classMethods[ $methodId ] = $class->getMethod($prefix . $methodHash);
+            return $methodName;
         }
     }
 
@@ -166,11 +163,13 @@ abstract class ExchangeSerializer
 
     /**
      * Creates a list of key value pairs for unique search of entities.
-     * @param array $data serialized entity
-     * @param \Mapbender\ManagerBundle\Component\ClassMetadata $meta
-     * @param boolean $addUniques flag to add of uniques fields
-     * @param array $added a list of added fields
+     *
+     * @param array         $data       serialized entity
+     * @param ClassMetadata $meta
+     * @param boolean       $addUniques flag to add of uniques fields
+     * @param array         $added      a list of added fields
      * @return array list of search parameters (criteria)
+     * @throws \Doctrine\ORM\Mapping\MappingException
      */
     private function criteriaFromData(array &$data, ClassMetadata $meta, $addUniques = false, array $added = array())
     {
@@ -207,7 +206,7 @@ abstract class ExchangeSerializer
         }
         if ($addUniques) {
             $fieldNames = $meta->getFieldNames();
-            foreach ($fieldNames as $fieldName) {
+            foreach ($fieldNames as &$fieldName) {
                 $fm = $meta->getFieldMapping($fieldName);
                 if ($fm['unique'] && $getMethod = $this->getReturnMethod($ident, $meta->getReflectionClass())) {
                     $criteria[$fieldName] = $getMethod->invoke($object);
@@ -237,8 +236,8 @@ abstract class ExchangeSerializer
     {
         if (!$data || !is_array($data)) {
             return null;
-        } elseif (key_exists(self::KEY_CLASS, $data)) {
-            return $data[self::KEY_CLASS];
+        } elseif (isset($data[ self::KEY_CLASS ])) {
+            return $data[ self::KEY_CLASS ];
         } else {
             return null;
         }
