@@ -9,9 +9,9 @@
 namespace Mapbender\ManagerBundle\Controller;
 
 use FOM\ManagerBundle\Configuration\Route as ManagerRoute;
-use Mapbender\CoreBundle\Entity\Application;
 use Mapbender\CoreBundle\Component\Application as AppComponent;
 use Mapbender\CoreBundle\Component\EntityHandler;
+use Mapbender\CoreBundle\Entity\Application;
 use Mapbender\CoreBundle\Entity\Layerset;
 use Mapbender\CoreBundle\Entity\RegionProperties;
 use Mapbender\CoreBundle\Form\Type\LayersetType;
@@ -25,8 +25,8 @@ use Mapbender\ManagerBundle\Form\Type\ApplicationType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -157,16 +157,12 @@ class ApplicationController extends Controller
             );
         } elseif ($this->getRequest()->getMethod() === 'POST') {
             if ($impHandler->bindForm()) {
-                $job     = $impHandler->getJob();
-                $scFile  = $job->getImportFile();
-                $time    = new \DateTime('now');
-                $scFile->move(sys_get_temp_dir(), $time->getTimestamp());
-                $tmpfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $time->getTimestamp();
                 $yaml    = new Parser();
-                $content = $yaml->parse(file_get_contents($tmpfile));
-                unlink($tmpfile);
-                $job->setImportContent($content);
+                $job     = $impHandler->getJob();
+                $fileSrc = $job->getImportFile()->getPathname();
+                $job->setImportContent($yaml->parse(file_get_contents($fileSrc)));
                 $impHandler->makeJob();
+                unlink($fileSrc);
                 return $this->redirect($this->generateUrl('mapbender_manager_application_index'));
             } else {
                 $form = $impHandler->createForm();
