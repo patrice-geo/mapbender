@@ -81,8 +81,8 @@ class OdgParser
         $draMapNode = (new \DOMXPath($doc))->query("//draw:custom-shape[@draw:name='map']")->item(0);
 
         return json_encode(array(
-            'width'  => static::parseNumericNodeAttribute($draMapNode, 'svg:width'),
-            'height' => static::parseNumericNodeAttribute($draMapNode, 'svg:height')
+            'width'  => static::parseNumericNodeAttribute($draMapNode, 'svg:width', 1),
+            'height' => static::parseNumericNodeAttribute($draMapNode, 'svg:height', 1)
         ));
     }
 
@@ -108,8 +108,8 @@ class OdgParser
         $data         = array(
             'orientation' => static::parseNodeAttribute($pageGeometry, 'style:print-orientation', static::DEFAULT_ORIENTATION),
             'pageSize'    => array(
-                'height' => static::parseNumericNodeAttribute($pageGeometry, 'fo:page-height'),
-                'width'  => static::parseNumericNodeAttribute($pageGeometry, 'fo:page-width'),
+                'height' => static::parseNumericNodeAttribute($pageGeometry, 'fo:page-height', 10),
+                'width'  => static::parseNumericNodeAttribute($pageGeometry, 'fo:page-width', 10),
             ),
             'fields' => array()
         );
@@ -181,11 +181,11 @@ class OdgParser
      * @param mixed       $defaultValue
      * @return mixed
      */
-    static function parseNumericNodeAttribute($node, $xPath, $defaultValue = 0)
+    static function parseNumericNodeAttribute($node, $xPath, $factor, $defaultValue = 0)
     {
         $value = $node->getAttribute($xPath);
         if (!empty($value) && is_string($value) && strlen($value) > 2) {
-            $value = substr($value, 0, -2) * 10;
+            $value = substr($value, 0, -2) * $factor;
         } else {
             $value = $defaultValue;
         }
@@ -201,10 +201,10 @@ class OdgParser
     public static function parseShape($customShape)
     {
         return array(
-            'width'  => static::parseNumericNodeAttribute($customShape, 'svg:width'),
-            'height' => static::parseNumericNodeAttribute($customShape, 'svg:height'),
-            'x'      => static::parseNumericNodeAttribute($customShape, 'svg:x'),
-            'y'      => static::parseNumericNodeAttribute($customShape, 'svg:y'),
+            'width'  => static::parseNumericNodeAttribute($customShape, 'svg:width', 10),
+            'height' => static::parseNumericNodeAttribute($customShape, 'svg:height', 10),
+            'x'      => static::parseNumericNodeAttribute($customShape, 'svg:x', 10),
+            'y'      => static::parseNumericNodeAttribute($customShape, 'svg:y', 10),
         );
     }
 }
